@@ -11,7 +11,7 @@ module.exports = React.createClass({
 
 	componentDidMount: function(){
 		setTimeout(() =>{
-			this.props.navigator.replace({name: 'login'});
+			this.props.navigator.replace({name: 'signin'});
 		}, 2000);
 	},
 	render: function(){

@@ -16,14 +16,14 @@ var Parse = require('parse/react-native');
 
 //Declare top level views
 var Splash = require('./views/splash');
-var Login = require('./views/login');
+var Signin = require('./views/signin');
 var Signup = require('./views/signup');
 var Home = require('./views/home');
 
 //Registering top level views
 var ROUTES = {
 	splash: Splash,
-	login: Login,
+	signin: Signin,
 	signup: Signup,
 	home: Home
 };
@@ -41,7 +41,7 @@ module.exports = React.createClass({
         	//Render first view through initialRoute
 			<Navigator 
 				style={styles.container} 
-				initialRoute={{ name: 'splash', index: 0 }} 
+				initialRoute={{ name: 'home', index: 0 }} 
 				renderScene={ this.renderScene } 
 				configureScene={ () => { return Navigator.SceneConfigs.PushFromRight; }}
 			>

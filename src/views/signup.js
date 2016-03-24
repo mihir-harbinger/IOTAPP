@@ -31,7 +31,7 @@ module.exports = React.createClass({
 		return(
 			<View style={styles.container}>
 				<View style={styles.header}>
-					<Icon name="account-circle" size={50} color="#03A9F4" />
+					<Icon name="account-circle" size={50} color="#0288D1" />
 					<Text style={styles.title}>quick sign up</Text>
 				</View>
 				<View style={styles.body}>
@@ -65,7 +65,7 @@ module.exports = React.createClass({
 					 <Button 
 					 	text={'SIGN UP'} 
 					 	onPressColor={'#1565C0'}
-					 	onRelaxColor={'#42A5F5'} 
+					 	onRelaxColor={'#0288D1'} 
 					 	onPress={this.onSignupPress}
 					 />
 					 <Text style={styles.errorMessage}>{this.state.error}</Text>
@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
 		paddingBottom: 20
 	},
 	title: {
-		color: '#03A9F4',
+		color: '#0288D1',
 		fontSize: 30,
 	},
 	input: {
