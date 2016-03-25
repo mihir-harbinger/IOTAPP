@@ -18,17 +18,7 @@ module.exports = {
 		// 		console.log("Error: "+ JSON.stringify(error, null, 2));
 		// 	}
 		// });		
-		Parse.Cloud.run('fetchListOfRooms', {}, {
-			success: function(result){
-				console.log("[API] Success: "+ JSON.stringify(result, null, 2));
-				//return Promise.resolve(result);
-				return result;
-			},
-			error: function(error){
-				console.log("[API] Error: "+ JSON.stringify(error, null, 2));
-				//return Promise.resolve(error);
-				return error;
-			}
-		});
+
+
 	}
 }

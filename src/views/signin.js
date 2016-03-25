@@ -23,7 +23,7 @@ module.exports = React.createClass({
 			password: '',
 			currentPhrase: '',
 			phraseColor: '#ffffff',
-			loginDisabled: false
+			interactionDisabled: false
 		}
 	},
 	render: function(){
@@ -71,7 +71,7 @@ module.exports = React.createClass({
 	},
 	onLoginPress: function(){
 
-		if(this.state.loginDisabled){
+		if(this.state.interactionDisabled){
 			return;
 		}
 		if(this.state.username===""){
@@ -86,7 +86,7 @@ module.exports = React.createClass({
 				phraseColor: '#1A237E'
 			});
 		}		
-		this.setState({ currentPhrase: '', phraseColor: '#ffffff', loginDisabled: true });
+		this.setState({ currentPhrase: '', phraseColor: '#ffffff', interactionDisabled: true });
 		this.setRandomMessage();
 
 		Parse.User.logIn(this.state.username, this.state.password, {
@@ -95,7 +95,7 @@ module.exports = React.createClass({
 				clearInterval(interval);
 				this.setState({
 					currentPhrase: '',
-					loginDisabled: false
+					interactionDisabled: false
 				});
 				console.log(user);
 				this.props.navigator.immediatelyResetRouteStack([{name: 'home'}]);
@@ -116,13 +116,15 @@ module.exports = React.createClass({
 				this.setState({
 					currentPhrase: errorText,
 					phraseColor: '#1A237E',
-					loginDisabled: false
+					interactionDisabled: false
 				});
 			}
 		});		
 	},
 	onSignupPress: function(){
-		this.props.navigator.push({name: 'signup'});
+		if(!this.state.interactionDisabled){
+			this.props.navigator.push({name: 'signup'});
+		}
 	},
 	setRandomMessage: function(){
 		var _this = this;

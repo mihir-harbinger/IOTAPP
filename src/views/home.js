@@ -2,24 +2,33 @@
 var React = require('react-native');
 
 var {
-	TouchableHighlight,
-	StyleSheet,
-	ListView,
-	View,
-	Text
+  PullToRefreshViewAndroid,
+  DrawerLayoutAndroid,
+  TouchableHighlight,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  ListView,
+  Platform,
+  Image,
+  Text,
+  View
 } = React;
 
+var ToolbarBeforeLoad = require('../components/toolbarBeforeLoad');
+var ToolbarAfterLoad = require('../components/toolbarAfterLoad');
+var Parse = require('parse/react-native').Parse;
 var API = require('../API/api');
 
 module.exports = React.createClass({
 
 	getInitialState: function(){
 		return{
-			rawData: null,
 			dataSource: new ListView.DataSource({
-				rowHasChanged: (row1, row2) => row1 !== row2
-			}),
-			loaded: false
+          		rowHasChanged: (row1, row2) => row1 !== row2
+        	}),
+			loaded: false,
+			isRefreshing: false
 		}
 	},
 	componentDidMount: function(){
@@ -28,23 +37,32 @@ module.exports = React.createClass({
 	fetchData: function(){
 
 		var _this = this;
+		this.setState({ isRefreshing: true });
 
-		var result = API.fetchRoomList();
-		this.setState({ 
-			rawData: result, 
-			dataSource: this.state.dataSource.cloneWithRows(result),
-			loaded: true
-		});				
-		return;
-		promise.then((data) => {
-				console.log('hi');
-				_this.setState({ 
-					rawData: result, 
-					dataSource: _this.state.dataSource.cloneWithRows(result),
-					loaded: true, 
-				});				
-			})
-		
+		Parse.Cloud.run('fetchListOfRooms', {}).then(
+
+			function(result){
+
+				//Convert ParseObject to JSON; then push into an array.
+				var cleanData = [];
+				for(var i=0;i<result.length;i++){
+					cleanData.push(result[i].toJSON());
+				}
+
+				console.log("[API] Success: ", cleanData);
+
+				if(_this.isMounted()){
+					_this.setState({ 
+						dataSource: _this.state.dataSource.cloneWithRows(cleanData),
+						loaded: true,
+						isRefreshing: false
+					});					
+				}
+			},
+			function(error){
+				console.log("[API] Error: "+ JSON.stringify(error, null, 2));
+			}
+		);
 	},
 	render: function(){
 		if(!this.state.loaded){
@@ -52,38 +70,69 @@ module.exports = React.createClass({
 		}
 
 		return(
-			<View style={styles.container}>
-				<ListView
-					dataSource={this.state.dataSource}
-					renderRow={this.renderAvailableRoom}
-					style={styles.listView}
-				>
-				</ListView>
-			</View>
-		)
+      		<DrawerLayoutAndroid
+        		drawerWidth={300}
+        		drawerPosition={DrawerLayoutAndroid.positions.Left}
+        		renderNavigationView={this.renderNavigationView}
+        		ref={'DRAWER'}
+      		>
+        		<View style={styles.container}>
+	          		<ToolbarAfterLoad
+    	        		title={'Home'}
+        	    		navigator={this.props.navigator}
+            			sidebarRef={this}
+          			/>
+	      			<PullToRefreshViewAndroid 
+    	    			style={styles.container}
+        				refeshing={this.state.isRefreshing}
+        				onRefresh={this.reloadData}
+        				enabled={this.state.isEnabled}
+      				>	
+            			<ScrollView>
+              				<ListView 
+	            				dataSource={this.state.dataSource}
+                    			renderRow={this.renderRoom}
+                    			style={styles.listView}
+                    		/>
+            			</ScrollView>
+          			</PullToRefreshViewAndroid>
+      			</View>
+      		</DrawerLayoutAndroid>
+    	);
 	},
 	renderLoadingView: function(){
 		return(
 			<View style={styles.container}>
+          		<ToolbarBeforeLoad
+	        		title={'Home'}
+	        		navigator={this.props.navigator}
+	        		componentRef={this}
+      			/>			
 				<Text>Loading...</Text>
 			</View>
 		)
 	},
-	renderAvailableRoom: function(room){
+	renderRoom: function(room){
 		return(
-			<TouchableHighlight style={{flex: 1, padding: 10}}>
-				<Text>{"Capacity: "+room.capacity}</Text>
+			<TouchableHighlight>
+			<View style={{flex: 1, padding: 10, backgroundColor: '#cccccc'}}>
+				<Text>{"Capacity: "+room.room_capacity}</Text>
 				<Text>{"Name: "+room.room_name}</Text>
+			</View>
 			</TouchableHighlight>
 		)
+	},
+	renderNavigationView: function(){
+	    return(
+			<View style={[styles.container, {backgroundColor: '#cccccc'}]}></View>
+	    );
+
 	}
 });
 
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		alignItems: 'center',
-		justifyContent: 'center'
 	},
 	listView: {
 		flex: 1
