@@ -15,10 +15,13 @@ var {
   View
 } = React;
 
+//get libraries
+var Parse = require('parse/react-native').Parse;
+
+//get components
 var ToolbarBeforeLoad = require('../components/toolbarBeforeLoad');
 var ToolbarAfterLoad = require('../components/toolbarAfterLoad');
-var Parse = require('parse/react-native').Parse;
-var API = require('../API/api');
+var Room = require('../components/room');
 
 module.exports = React.createClass({
 
@@ -28,7 +31,8 @@ module.exports = React.createClass({
           		rowHasChanged: (row1, row2) => row1 !== row2
         	}),
 			loaded: false,
-			isRefreshing: false
+			isRefreshing: false,
+			isEnabled: true
 		}
 	},
 	componentDidMount: function(){
@@ -37,7 +41,7 @@ module.exports = React.createClass({
 	fetchData: function(){
 
 		var _this = this;
-		this.setState({ isRefreshing: true });
+		this.setState({ isRefreshing: true, isEnabled: false });
 
 		Parse.Cloud.run('fetchListOfRooms', {}).then(
 
@@ -55,11 +59,13 @@ module.exports = React.createClass({
 					_this.setState({ 
 						dataSource: _this.state.dataSource.cloneWithRows(cleanData),
 						loaded: true,
-						isRefreshing: false
+						isRefreshing: false,
+						isEnabled: true
 					});					
 				}
 			},
 			function(error){
+				_this.setState({ isRefreshing: false, isEnabled: true })
 				console.log("[API] Error: "+ JSON.stringify(error, null, 2));
 			}
 		);
@@ -85,10 +91,13 @@ module.exports = React.createClass({
 	      			<PullToRefreshViewAndroid 
     	    			style={styles.container}
         				refeshing={this.state.isRefreshing}
-        				onRefresh={this.reloadData}
+        				onRefresh={this.fetchData}
         				enabled={this.state.isEnabled}
       				>	
-            			<ScrollView>
+            			<ScrollView style={styles.body}>
+            				<View style={styles.wrapper}>
+            					<Text style={styles.hint}>Book on the go</Text>
+            				</View>
               				<ListView 
 	            				dataSource={this.state.dataSource}
                     			renderRow={this.renderRoom}
@@ -108,18 +117,15 @@ module.exports = React.createClass({
 	        		navigator={this.props.navigator}
 	        		componentRef={this}
       			/>			
-				<Text>Loading...</Text>
+      			<View style={styles.loadingScene}>
+					<Image source={require('../../assets/images/loader.gif')} style={styles.loader}></Image>
+				</View>
 			</View>
 		)
 	},
 	renderRoom: function(room){
 		return(
-			<TouchableHighlight>
-			<View style={{flex: 1, padding: 10, backgroundColor: '#cccccc'}}>
-				<Text>{"Capacity: "+room.room_capacity}</Text>
-				<Text>{"Name: "+room.room_name}</Text>
-			</View>
-			</TouchableHighlight>
+			<Room data={room} />
 		)
 	},
 	renderNavigationView: function(){
@@ -134,7 +140,30 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 	},
+	body: {
+		flex: 1,
+		backgroundColor: '#f5f5f5',
+		padding: 10
+	},
 	listView: {
 		flex: 1
+	},
+	loadingScene: {
+		flex: 1,
+		backgroundColor: '#fefefe',
+		alignItems: 'center',
+		justifyContent: 'center'
+	},
+	loader: {
+		width: 400,
+		height: 300
+	},
+	wrapper:{
+		padding: 15,
+		backgroundColor: '#ffffff',
+		marginBottom: 15
+	},
+	hint: {
+		color: '#cccccc',
 	}
 });

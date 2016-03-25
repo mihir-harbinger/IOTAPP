@@ -61,7 +61,7 @@ module.exports = React.createClass({
 						secureTextEntry={true}
 						underlineColorAndroid={'#90CAF9'}
 						onChangeText={(text) =>this.setState({passwordConfirmation: text, error: ''})}
-					 />					 
+					 />
 					 <Button 
 					 	text={'SIGN UP'} 
 					 	onPressColor={'#1565C0'}
@@ -91,6 +91,11 @@ module.exports = React.createClass({
 				error: 'Please confirm your password'
 			});
 		}
+		if(this.state.email===""){
+			return this.setState({
+				error: 'Please provide an email address'
+			});
+		}
 		if(this.state.password !== this.state.passwordConfirmation){
 			return this.setState({
 				error: 'Passwords do not match. Please try again.'
@@ -107,6 +112,7 @@ module.exports = React.createClass({
 		var user = new Parse.User();
 		user.set('username', this.state.username);
 		user.set('password', this.state.password);
+		user.set('email', this.state.email);
 		console.log('calling api...');
 		this.setState({ loader: VisibleLoader, error: '' })
 		user.signUp(null, {
