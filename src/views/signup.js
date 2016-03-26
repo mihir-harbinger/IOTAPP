@@ -13,9 +13,6 @@ var Icon = require('react-native-vector-icons/MaterialIcons');
 var Button = require('../components/button');
 var Parse = require('parse/react-native').Parse;
 
-var VisibleLoader = require('../../assets/images/loading.gif');
-var HiddenLoader = require('../../assets/images/hidden.png');
-
 module.exports = React.createClass({
 
 	getInitialState: function(){
@@ -23,8 +20,9 @@ module.exports = React.createClass({
 			username: '',
 			password: '',
 			passwordConfirmation: '',
-			error: '',
-			loader: HiddenLoader
+			message: '',
+			messageColor: '#cccccc',
+			interactionDisabled: false
 		}
 	},
 	render: function(){
@@ -42,7 +40,7 @@ module.exports = React.createClass({
 						autoCorrect={false}
 						keyboardType={'email-address'}
 						underlineColorAndroid={'#90CAF9'}
-						onChangeText={(text) => this.setState({username: text, error: ''})}
+						onChangeText={(text) => this.setState({username: text, message: ''})}
 					 />
 					 <Text style={styles.inputDescriptor}>And a password</Text>
 					<TextInput
@@ -51,7 +49,7 @@ module.exports = React.createClass({
 						autoCorrect={false}
 						secureTextEntry={true}
 						underlineColorAndroid={'#90CAF9'}
-						onChangeText={(text) =>this.setState({password: text, error: ''})}
+						onChangeText={(text) =>this.setState({password: text, message: ''})}
 					 />
 					 <Text style={styles.inputDescriptor}>Confirm password</Text>
 					<TextInput
@@ -60,7 +58,7 @@ module.exports = React.createClass({
 						autoCorrect={false}
 						secureTextEntry={true}
 						underlineColorAndroid={'#90CAF9'}
-						onChangeText={(text) =>this.setState({passwordConfirmation: text, error: ''})}
+						onChangeText={(text) =>this.setState({passwordConfirmation: text, message: ''})}
 					 />
 					 <Button 
 					 	text={'SIGN UP'} 
@@ -68,53 +66,47 @@ module.exports = React.createClass({
 					 	onRelaxColor={'#0288D1'} 
 					 	onPress={this.onSignupPress}
 					 />
-					 <Text style={styles.errorMessage}>{this.state.error}</Text>
-					 <Image source={this.state.loader} style={styles.loader}></Image>
+					 <Text style={[styles.message, {color: this.state.messageColor}]}>{this.state.message}</Text>
 				</View>
 			</View>
 		)
 	},
 	onSignupPress: function(){
+
+		if(this.state.interactionDisabled){
+			return;
+		}
 		var _this=this;
 		if(this.state.username===""){
 			return this.setState({
-				error: 'Username is mandatory'
+				message: 'Username is mandatory'
 			});
 		}
 		if(this.state.password===""){
 			return this.setState({
-				error: 'You need a password!'
+				message: 'You need a password!'
 			});
 		}		
 		if(this.state.passwordConfirmation===""){
 			return this.setState({
-				error: 'Please confirm your password'
-			});
-		}
-		if(this.state.email===""){
-			return this.setState({
-				error: 'Please provide an email address'
+				message: 'Please confirm your password'
 			});
 		}
 		if(this.state.password !== this.state.passwordConfirmation){
 			return this.setState({
-				error: 'Passwords do not match. Please try again.'
+				message: 'Passwords do not match. Please try again.'
 			});
 		}
-
-		// DB.users.add({
-		// 	username: this.state.username,
-		// 	password: this.state.password
-		// });
 
 		Parse.User.logOut();
 
 		var user = new Parse.User();
 		user.set('username', this.state.username);
 		user.set('password', this.state.password);
-		user.set('email', this.state.email);
+
 		console.log('calling api...');
-		this.setState({ loader: VisibleLoader, error: '' })
+
+		this.setState({ interactionDisabled: true, message: 'Just a moment...', messageColor: '#cccccc' })
 		user.signUp(null, {
 			success: (user) => { console.log(user);this.props.navigator.immediatelyResetRouteStack([{name: 'home'}]); },
 			error: (user, error) => { 
@@ -131,10 +123,9 @@ module.exports = React.createClass({
 								break;
 				}
 				console.log(error);
-				this.setState({ error: errorText, loader: HiddenLoader });
+				this.setState({ interactionDisabled: false, message: errorText, messageColor: '#e53935' });
 			}
 		});
-		//this.props.navigator.immediatelyResetRouteStack([{name: 'home'}]);		
 	}
 });
 
@@ -180,14 +171,8 @@ const styles = StyleSheet.create({
 		alignSelf: 'center',
 		margin: 20,
 	},
-	errorMessage: {
-		color: '#e53935',
+	message: {
 		alignSelf: 'center',
 		margin: 10
-	},
-	loader: {
-		height: 11,
-		width: 43,
-		alignSelf: 'center',
 	}
 });

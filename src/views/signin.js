@@ -86,7 +86,7 @@ module.exports = React.createClass({
 				phraseColor: '#1A237E'
 			});
 		}		
-		this.setState({ currentPhrase: '', phraseColor: '#ffffff', interactionDisabled: true });
+		this.setState({ currentPhrase: 'Loading...', phraseColor: '#ffffff', interactionDisabled: true });
 		this.setRandomMessage();
 
 		Parse.User.logIn(this.state.username, this.state.password, {
