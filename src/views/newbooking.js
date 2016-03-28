@@ -20,8 +20,9 @@ var Parse = require('parse/react-native').Parse;
 var Moment = require('moment');
 
 //get components
-var ToolbarBeforeLoad = require('../components/toolbarBeforeLoad');
 var ToolbarAfterLoad = require('../components/toolbarAfterLoad');
+var LoadingView = require('../components/loadingview');
+var ReloadView = require('../components/reloadview');
 var Icon = require('react-native-vector-icons/MaterialIcons');
 var Room = require('../components/room');
 
@@ -93,7 +94,7 @@ module.exports = React.createClass({
 		if(this.state.isReloadRequired){
 			return this.renderReloadView();
 		}
-		if(!this.state.loaded){
+		if(this.state.loaded === false && this.state.isReloadRequired === false){
 			return this.renderLoadingView();
 		}
 
@@ -111,10 +112,10 @@ module.exports = React.createClass({
     					<View style={styles.wizardStep}>
 	    					<View style={styles.wizardStepTitle}>
 	    						<View style={{flex: 1}}>
-	    							<Icon name="looks-one" size={30} color="#4FC3F7" />
+	    							<Icon name="looks-one" size={30} color="#0288D1" />
 	    						</View>
 	    						<View style={{flex: 5}}>
-	    							<Text style={{color: '#4FC3F7', fontSize: 15, marginTop: 3.7}}>Set Meeting Title</Text>
+	    							<Text style={{color: '#0288D1', fontSize: 15, marginTop: 3.7}}>Set Meeting Title</Text>
 	    						</View>
 	    					</View>
 	    					<View style={styles.wizardstepAction}>
@@ -135,10 +136,10 @@ module.exports = React.createClass({
     					<View style={styles.wizardStep}>
 	    					<View style={styles.wizardStepTitle}>
 	    						<View style={{flex: 1}}>
-	    							<Icon name="looks-two" size={30} color="#4FC3F7" />
+	    							<Icon name="looks-two" size={30} color="#0288D1" />
 	    						</View>
 	    						<View style={{flex: 5}}>
-	    							<Text style={{color: '#4FC3F7', fontSize: 15, marginTop: 3.7}}>Set Meeting Description</Text>
+	    							<Text style={{color: '#0288D1', fontSize: 15, marginTop: 3.7}}>Set Meeting Description</Text>
 	    						</View>
 	    					</View>
 	    					<View style={styles.wizardstepAction}>
@@ -159,10 +160,10 @@ module.exports = React.createClass({
     					<View style={styles.wizardStep}>
 	    					<View style={styles.wizardStepTitle}>
 	    						<View style={{flex: 1}}>
-	    							<Icon name="looks-3" size={30} color="#4FC3F7" />
+	    							<Icon name="looks-3" size={30} color="#0288D1" />
 	    						</View>
 	    						<View style={{flex: 5}}>
-	    							<Text style={{color: '#4FC3F7', fontSize: 15, marginTop: 3.7}}>Select Conference Room</Text>
+	    							<Text style={{color: '#0288D1', fontSize: 15, marginTop: 3.7}}>Select Conference Room</Text>
 	    						</View>
 	    					</View>
 	    					<View style={styles.wizardstepAction}>
@@ -183,10 +184,10 @@ module.exports = React.createClass({
     					<View style={styles.wizardStep}>
 	    					<View style={styles.wizardStepTitle}>
 	    						<View style={{flex: 1}}>
-	    							<Icon name="looks-4" size={30} color="#4FC3F7" />
+	    							<Icon name="looks-4" size={30} color="#0288D1" />
 	    						</View>
 	    						<View style={{flex: 5}}>
-	    							<Text style={{color: '#4FC3F7', fontSize: 15, marginTop: 3.7}}>Select Desired Date</Text>
+	    							<Text style={{color: '#0288D1', fontSize: 15, marginTop: 3.7}}>Select Desired Date</Text>
 	    						</View>
 	    					</View>
 	    					<View style={styles.wizardstepAction}>
@@ -205,10 +206,10 @@ module.exports = React.createClass({
     					<View style={styles.wizardStep}>
 	    					<View style={styles.wizardStepTitle}>
 	    						<View style={{flex: 1}}>
-	    							<Icon name="looks-5" size={30} color="#4FC3F7" />
+	    							<Icon name="looks-5" size={30} color="#0288D1" />
 	    						</View>
 	    						<View style={{flex: 5}}>
-	    							<Text style={{color: '#4FC3F7', fontSize: 15, marginTop: 3.7}}>Select In-Out Time</Text>
+	    							<Text style={{color: '#0288D1', fontSize: 15, marginTop: 3.7}}>Select In-Out Time</Text>
 	    						</View>
 	    					</View>
 	    					<View style={styles.wizardstepAction}>
@@ -233,40 +234,11 @@ module.exports = React.createClass({
 		)
 	},
 	renderLoadingView: function(){
-		return(
-			<View style={styles.container}>
-          		<ToolbarBeforeLoad
-          			navIcon={require('../../assets/images/arrow_back.png')}
-	        		title={'New Booking'}
-	        		navigator={this.props.navigator}
-	        		componentRef={this}
-	        		isChildView={true}
-      			/>			
-      			<View style={styles.loadingScene}>
-					<Image source={require('../../assets/images/loader.gif')} style={styles.loader}></Image>
-				</View>
-			</View>
-		)
+		return <LoadingView title={'Home'} navigator={this.props.navigator}  />
 	},
 	renderReloadView: function(){
-		return(
-			<View style={styles.container}>
-          		<ToolbarBeforeLoad
-	        		title={'Home'}
-	        		navigator={this.props.navigator}
-	        		componentRef={this}
-	        		isChildView={true}
-      			/>
-      			<View style={styles.reloadScene}>
-      				<View style={styles.centerWeighted}>
-      					<Image source={require('../../assets/images/uh_oh_transparent.png')} style={styles.errorImage}></Image>
-      					<Text style={styles.errorMessageReload}>Oops! Something went wrong :(</Text>
-      					<Icon name="replay" size={25} color="#999999" style={styles.reloadArrow} onPress={ this.loadData } />
-      				</View>
-				</View>
-			</View>
-		);
-	},	
+		return <ReloadView title={'Home'} navigator={this.props.navigator} loadData={this.loadData} />
+	},
 	renderRoomList: function(){
 		return this.state.rawData.map(function(room){
 			return(
@@ -330,31 +302,8 @@ const styles = StyleSheet.create({
 	},
 	body: {
 		flex: 1,
-		backgroundColor: '#f5f5f5',
+		backgroundColor: '#e8e8e8',
 		padding: 10
-	},
-	loadingScene: {
-		flex: 1,
-		backgroundColor: '#fefefe',
-		alignItems: 'center',
-		justifyContent: 'center'
-	},
-	loader: {
-		width: 400,
-		height: 300
-	},
-	reloadScene:{
-		flex: 1,
-		backgroundColor: '#ffffff',
-	},
-	centerWeighted: {
-		flex: 1,
-		alignItems: 'center',
-		justifyContent: 'center'		
-	},
-	errorImage: {
-		width: 300,
-		height: 225
 	},
 	wizardWrapper: {
 		backgroundColor: '#ffffff',

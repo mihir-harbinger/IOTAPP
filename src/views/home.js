@@ -17,10 +17,12 @@ var {
 
 //get libraries
 var Parse = require('parse/react-native').Parse;
+var Moment = require('moment');
 
 //get components
-var ToolbarBeforeLoad = require('../components/toolbarBeforeLoad');
 var ToolbarAfterLoad = require('../components/toolbarAfterLoad');
+var LoadingView = require('../components/loadingview');
+var ReloadView = require('../components/reloadview');
 var Icon = require('react-native-vector-icons/MaterialIcons');
 var Room = require('../components/room');
 
@@ -127,7 +129,7 @@ module.exports = React.createClass({
 	            				<View style={styles.wrapper}>
 	            					<View style={styles.leftSection}>
 	            						<Text style={styles.hint}>BOOK ON THE GO</Text>
-	            						<Text style={styles.currentMonth}>FEB 2016</Text>
+	            						<Text style={styles.currentMonth}>{(Moment().format("MMM YYYY")).toUpperCase()}</Text>
 	            						<Text style={styles.location}>Global Port</Text>
 	            					</View>
 	            					<View style={styles.rightSection}>
@@ -150,38 +152,10 @@ module.exports = React.createClass({
     	);
 	},
 	renderLoadingView: function(){
-		return(
-			<View style={styles.container}>
-          		<ToolbarBeforeLoad
-          			navIcon={require('../../assets/images/stack.png')}
-	        		title={'Home'}
-	        		navigator={this.props.navigator}
-	        		componentRef={this}
-	        		isChildView={false}
-      			/>			
-      			<View style={styles.loadingScene}>
-					<Image source={require('../../assets/images/loader.gif')} style={styles.loader}></Image>
-				</View>
-			</View>
-		)
+		return <LoadingView title={'Home'} navigator={this.props.navigator}  />
 	},
 	renderReloadView: function(){
-		return(
-			<View style={styles.container}>
-          		<ToolbarBeforeLoad
-	        		title={'Home'}
-	        		navigator={this.props.navigator}
-	        		componentRef={this}
-      			/>			
-      			<View style={styles.reloadScene}>
-      				<View style={styles.centerWeighted}>
-      					<Image source={require('../../assets/images/uh_oh_transparent.png')} style={styles.errorImage}></Image>
-      					<Text style={styles.errorMessageReload}>Oops! Something went wrong :(</Text>
-      					<Icon name="replay" size={25} color="#999999" style={styles.reloadArrow} onPress={ this.loadData } />      					
-      				</View>
-				</View>
-			</View>
-		);
+		return <ReloadView title={'Home'} navigator={this.props.navigator} loadData={this.loadData} />
 	},
 	renderRoom: function(room){
 		return(
@@ -204,30 +178,11 @@ const styles = StyleSheet.create({
 	},
 	body: {
 		flex: 1,
-		backgroundColor: '#f5f5f5',
+		backgroundColor: '#e8e8e8',
 		padding: 10
 	},
 	listView: {
 		flex: 1
-	},
-	loadingScene: {
-		flex: 1,
-		backgroundColor: '#fefefe',
-		alignItems: 'center',
-		justifyContent: 'center'
-	},
-	reloadScene:{
-		flex: 1,
-		backgroundColor: '#ffffff',
-	},
-	centerWeighted: {
-		flex: 1,
-		alignItems: 'center',
-		justifyContent: 'center'		
-	},
-	loader: {
-		width: 400,
-		height: 300
 	},
 	touchable:{
 		marginBottom: 10,
@@ -241,7 +196,7 @@ const styles = StyleSheet.create({
 	},
 	hint: {
 		fontSize: 15,
-		color: '#4FC3F7',
+		color: '#0288D1',
 		marginTop: 2
 	},
 	leftSection: {
@@ -255,18 +210,6 @@ const styles = StyleSheet.create({
 	bookNowImage: {
 		width: 90,
 		height: 83
-	},
-	errorMessageReload: {
-		alignSelf: 'center',
-		fontSize: 15
-	},
-	reloadArrow: {
-		alignSelf: 'center',
-		margin: 10,
-	},
-	errorImage: {
-		width: 300,
-		height: 225
 	},
 	currentMonth: {
 		fontSize: 32
