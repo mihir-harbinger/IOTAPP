@@ -32,9 +32,12 @@ module.exports = React.createClass({
 			loaded: false,
 			isReloadRequired: false,
 			selectedIndex: '',
-			selectedDate: Moment().format("MMMM Do YYYY"),
-			selectedInTime: roundToNextSlot().format("HH:mm"),
-			selectedOutTime: Moment(roundToNextSlot()).add(30, "minutes").format("HH:mm")
+			selectedDate: Moment(),
+			minDate: new Date(),
+			selectedInHour: parseInt(roundToNextSlot(Moment()).format("HH"), 10),
+			selectedInMinute: parseInt(roundToNextSlot(Moment()).format("mm"), 10),
+			selectedOutHour: parseInt(Moment(roundToNextSlot(Moment())).add(30, "minutes").format("HH"), 10),
+			selectedOutMinute: parseInt(Moment(roundToNextSlot(Moment())).add(30, "minutes").format("mm"), 10)
 		}
 	},
 	componentDidMount: function(){
@@ -49,7 +52,7 @@ module.exports = React.createClass({
 			if(_this.isMounted()){
 				if(_this.state.loaded===false){
 					_this.setState({
-						isReloadRequired: true
+						isReloadRequired: true,
 					})
 				}
 			}
@@ -76,7 +79,7 @@ module.exports = React.createClass({
 						rawData: cleanData,
 						loaded: true,
 						isReloadRequired: false,
-						selectedIndex: cleanData[0].room_mac_id
+						selectedIndex: cleanData[0].room_mac_id,
 					});					
 				}
 			},
@@ -192,8 +195,8 @@ module.exports = React.createClass({
 	    						</View>
 	    						<View style={{flex: 5}}>
 				    				<View style={styles.timeWrapper}>
-				    					<TouchableHighlight onPress={onPressSetDate} style={styles.selectedDateTimeTouchable} underlayColor={'#e5e5e5'}>
-				    						<Text style={styles.dateTime}>{this.state.selectedDate}</Text>
+				    					<TouchableHighlight onPress={this.onPressSetDate.bind(this, 'min', {date: this.state.minDate, minDate: new Date()})} style={styles.selectedDateTimeTouchable} underlayColor={'#e5e5e5'}>
+				    						<Text style={styles.dateTime}>{this.state.selectedDate.format("MMMM Do YYYY")}</Text>
 				    					</TouchableHighlight>
 				    				</View>
 	    						</View>    					
@@ -214,11 +217,11 @@ module.exports = React.createClass({
 	    						</View>
 	    						<View style={{flex: 5}}>
 				    				<View style={styles.timeWrapper}>
-				    					<TouchableHighlight onPress={onPressSetInTime} style={styles.selectedDateTimeTouchable} underlayColor={'#e5e5e5'}>
-				    						<Text style={styles.dateTime}>IN: <Text style={styles.selectedDateTime}>{this.state.selectedInTime}</Text></Text>
+				    					<TouchableHighlight onPress={this.onPressSetInOutTime.bind(this, "IN", {hour: this.state.selectedInHour, minute: this.state.selectedInMinute})} style={styles.selectedDateTimeTouchable} underlayColor={'#e5e5e5'}>
+				    						<Text style={styles.dateTime}>IN: <Text style={styles.selectedDateTime}>{this.getInHour()+":"+this.getInMinute()}</Text></Text>
 				    					</TouchableHighlight>
-				    					<TouchableHighlight onPress={onPressSetInTime} style={styles.selectedDateTimeTouchable} underlayColor={'#e5e5e5'}>
-				    						<Text style={styles.dateTime}>OUT: <Text style={styles.selectedDateTime}>{this.state.selectedOutTime}</Text></Text>
+				    					<TouchableHighlight onPress={this.onPressSetInOutTime.bind(this, "OUT", {hour: this.state.selectedOutHour, minute: this.state.selectedOutMinute})} style={styles.selectedDateTimeTouchable} underlayColor={'#e5e5e5'}>
+				    						<Text style={styles.dateTime}>OUT: <Text style={styles.selectedDateTime}>{this.getOutHour()+":"+this.getOutMinute()}</Text></Text>
 				    					</TouchableHighlight>				    					
 				    				</View>
 	    						</View>    					
@@ -271,19 +274,45 @@ module.exports = React.createClass({
 			);
 		});		
 	},
+	onPressSetInOutTime: async function(mode, options){
+		const {action, minute, hour} = await TimePickerAndroid.open(options);
+		if(!(action === TimePickerAndroid.timeSetAction)){
+			return;
+		}
+		switch(mode){
+			case "IN"	: 	this.setState({ selectedInHour: parseInt(hour, 10), selectedInMinute: parseInt(minute, 10) });
+							break;
+			case "OUT"	: 	this.setState({ selectedOutHour: parseInt(hour, 10), selectedOutMinute: parseInt(minute, 10) });
+							break;
+		}
+	},
+	onPressSetDate: async function(mode, options){
+		const {action, year, month, day} = await DatePickerAndroid.open(options);
+		if (action === DatePickerAndroid.dismissedAction) {
+			return;
+		}
+		var dateString = year + "-" + ((month+1)<10 ? "0"+(month+1) : month+1) + "-" + (day < 10 ? "0"+day : day);
+		var date = new Date(dateString);
+		console.log(dateString);
+		this.setState({ selectedDate: Moment(date) });
+
+	},
+	getInHour: function(){
+		return this.state.selectedInHour === 0 ? "00" : this.state.selectedInHour;
+	},
+	getInMinute: function(){
+		return this.state.selectedInMinute === 0 ? "00" : this.state.selectedInMinute;
+	},
+	getOutHour: function(){
+		return this.state.selectedOutHour === 0 ? "00" : this.state.selectedOutHour;
+	},
+	getOutMinute: function(){
+		return this.state.selectedOutMinute === 0 ? "00" : this.state.selectedOutMinute;
+	},	
 });
 
-async function onPressSetDate(){
-	const {action, year, month, day} = await DatePickerAndroid.open();
-}
-
-async function onPressSetInTime(){
-	const {action, year, month, day} = await TimePickerAndroid.open();
-}
-
-function roundToNextSlot(){
+function roundToNextSlot(start){
 	var ROUNDING = 30 * 60 * 1000; /*ms*/
-	var start = Moment();
 	start = Moment(Math.ceil((+start) / ROUNDING) * ROUNDING);
 	return start;
 }
