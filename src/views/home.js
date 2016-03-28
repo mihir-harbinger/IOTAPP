@@ -7,6 +7,7 @@ var {
   TouchableHighlight,
   ScrollView,
   StyleSheet,
+  Dimensions,
   TextInput,
   ListView,
   Platform,
@@ -21,6 +22,7 @@ var Parse = require('parse/react-native').Parse;
 //get components
 var ToolbarBeforeLoad = require('../components/toolbarBeforeLoad');
 var ToolbarAfterLoad = require('../components/toolbarAfterLoad');
+var Icon = require('react-native-vector-icons/MaterialIcons');
 var Room = require('../components/room');
 
 module.exports = React.createClass({
@@ -32,16 +34,31 @@ module.exports = React.createClass({
         	}),
 			loaded: false,
 			isRefreshing: false,
-			isEnabled: true
+			isEnabled: true,
+			isReloadRequired: false
 		}
 	},
 	componentDidMount: function(){
-		this.fetchData();
+		this.loadData();
 	},
-	fetchData: function(){
+	loadData: function(){
+		
+		var _this = this;
+		this.API();
+
+		//check if data is loaded
+		setTimeout(function(){
+			if(_this.state.loaded===false){
+				_this.setState({
+					isReloadRequired: true
+				})
+			}
+		}, 10000);
+	},
+	API: function(){
 
 		var _this = this;
-		this.setState({ isRefreshing: true, isEnabled: false });
+		this.setState({ isRefreshing: true, isEnabled: false, isReloadRequired: false, loaded: false });
 
 		Parse.Cloud.run('fetchListOfRooms', {}).then(
 
@@ -58,19 +75,23 @@ module.exports = React.createClass({
 				if(_this.isMounted()){
 					_this.setState({ 
 						dataSource: _this.state.dataSource.cloneWithRows(cleanData),
-						loaded: true,
 						isRefreshing: false,
+						loaded: true,
+						isReloadRequired: false,
 						isEnabled: true
 					});					
 				}
 			},
 			function(error){
-				_this.setState({ isRefreshing: false, isEnabled: true })
+				_this.setState({ isRefreshing: false, isEnabled: true, isReloadRequired: true, loaded: false })
 				console.log("[API] Error: "+ JSON.stringify(error, null, 2));
 			}
 		);
 	},
 	render: function(){
+		if(this.state.isReloadRequired){
+			return this.renderReloadView();
+		}
 		if(!this.state.loaded){
 			return this.renderLoadingView();
 		}
@@ -96,7 +117,7 @@ module.exports = React.createClass({
       				>	
             			<ScrollView style={styles.body}>
             				<View style={styles.wrapper}>
-            					<Text style={styles.hint}>Book on the go</Text>
+            					<Text style={styles.hint}>BOOK ON THE GO</Text>
             				</View>
               				<ListView 
 	            				dataSource={this.state.dataSource}
@@ -123,6 +144,24 @@ module.exports = React.createClass({
 			</View>
 		)
 	},
+	renderReloadView: function(){
+		return(
+			<View style={styles.container}>
+          		<ToolbarBeforeLoad
+	        		title={'Home'}
+	        		navigator={this.props.navigator}
+	        		componentRef={this}
+      			/>			
+      			<View style={styles.reloadScene}>
+      				<View style={styles.centerWeighted}>
+      					<Image source={require('../../assets/images/uh_oh.png')} style={styles.errorImage}></Image>
+      					<Text style={styles.errorMessageReload}>Oops! Something went wrong :(</Text>
+      					<Icon name="replay" size={25} color="#999999" style={styles.reloadArrow} onPress={ this.loadData } />      					
+      				</View>
+				</View>
+			</View>
+		);
+	},
 	renderRoom: function(room){
 		return(
 			<Room data={room} />
@@ -132,8 +171,7 @@ module.exports = React.createClass({
 	    return(
 			<View style={[styles.container, {backgroundColor: '#cccccc'}]}></View>
 	    );
-
-	}
+	},
 });
 
 const styles = StyleSheet.create({
@@ -154,6 +192,15 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		justifyContent: 'center'
 	},
+	reloadScene:{
+		flex: 1,
+		backgroundColor: '#f4f4f4',
+	},
+	centerWeighted: {
+		flex: 1,
+		alignItems: 'center',
+		justifyContent: 'center'		
+	},
 	loader: {
 		width: 400,
 		height: 300
@@ -164,6 +211,18 @@ const styles = StyleSheet.create({
 		marginBottom: 15
 	},
 	hint: {
-		color: '#cccccc',
+		color: '#4FC3F7',
+	},
+	errorMessageReload: {
+		alignSelf: 'center',
+		fontSize: 15
+	},
+	reloadArrow: {
+		alignSelf: 'center',
+		margin: 10,
+	},
+	errorImage: {
+		width: 300,
+		height: 225
 	}
 });
