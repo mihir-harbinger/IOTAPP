@@ -17,7 +17,7 @@ module.exports = React.createClass({
 	render: function(){
 		return(
 			<View style={styles.container}>
-				<Image source={require('../../assets/images/hs_logo_3x_white.png')} style={styles.logo} />
+				<Image source={require('../../assets/images/HSLOGO/hs_logo_3x_white.png')} style={styles.logo} />
 			</View>
 		);
 	}

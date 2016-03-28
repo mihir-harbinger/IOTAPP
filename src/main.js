@@ -19,13 +19,15 @@ var Splash = require('./views/splash');
 var Signin = require('./views/signin');
 var Signup = require('./views/signup');
 var Home = require('./views/home');
+var NewBooking = require('./views/newbooking');
 
 //Registering top level views
 var ROUTES = {
 	splash: Splash,
 	signin: Signin,
 	signup: Signup,
-	home: Home
+	home: Home,
+	newbooking: NewBooking
 };
 
 var _navigator;
@@ -41,7 +43,7 @@ module.exports = React.createClass({
         	//Render first view through initialRoute
 			<Navigator 
 				style={styles.container} 
-				initialRoute={{ name: 'splash', index: 0 }} 
+				initialRoute={{ name: 'newbooking', index: 0 }} 
 				renderScene={ this.renderScene } 
 				configureScene={ () => { return Navigator.SceneConfigs.PushFromRight; }}
 			>
@@ -71,9 +73,9 @@ const styles = StyleSheet.create({
 });
 
 BackAndroid.addEventListener('hardwareBackPress', () => {
-  if (_navigator.getCurrentRoutes().length === 1  ) {
-     return false;
-  }
-  _navigator.pop();
-  return true;
+	if (_navigator.getCurrentRoutes().length === 1  ) {
+    	return false;
+  	}
+  	_navigator.pop();
+  	return true;
 });

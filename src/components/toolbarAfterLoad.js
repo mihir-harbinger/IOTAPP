@@ -9,7 +9,7 @@ module.exports = React.createClass({
 	render: function(){
 		return(
 			<ToolbarAndroid
-          		navIcon={require('../../assets/images/stack.png')}
+          		navIcon={this.props.navIcon}
             	title={this.props.title}
             	titleColor='#ffffff'
             	style={styles.toolbar}
@@ -26,7 +26,12 @@ module.exports = React.createClass({
 		}
 	},
 	_onIconClicked: function(){
-		this.props.sidebarRef.refs['DRAWER'].openDrawer();
+		if(!this.props.isChildView){
+			this.props.sidebarRef.refs['DRAWER'].openDrawer();
+		}
+		else{
+			this.props.navigator.pop();	
+		}
 	}
 });
 

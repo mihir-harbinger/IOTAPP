@@ -9,11 +9,13 @@ module.exports = React.createClass({
 	render: function(){
 		return(
 			<ToolbarAndroid
+				navIcon={this.props.navIcon}
             	title={this.props.title}
             	titleColor='#ffffff'
             	style={styles.toolbar}
             	actions={[{title: 'About App', show: 'never'}, {title: 'Settings', show: 'never'}, {title: 'Logout', show: 'never'}]}
             	onActionSelected={this._onActionSelected}
+            	onIconClicked={this._onIconClicked}
           	>
           	</ToolbarAndroid>			
 		)		
@@ -21,6 +23,11 @@ module.exports = React.createClass({
 	_onActionSelected: function(position){
 		if(position === 2){
 			this.props.navigator.immediatelyResetRouteStack([{name: 'signin'}]);
+		}
+	},
+	_onIconClicked: function(){
+		if(this.props.isChildView){
+			this.props.navigator.pop();	
 		}
 	}
 });

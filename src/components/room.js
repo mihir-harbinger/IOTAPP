@@ -27,11 +27,11 @@ const styles = StyleSheet.create({
 		flex: 1,
 		padding: 15,
 		backgroundColor: '#ffffff',
-		borderRadius: 2
 	},
 	wrapper: {
-		marginBottom: 10,
-		borderRadius: 2
+		borderBottomWidth: 1,
+		borderBottomColor: '#f5f5f5'
+
 	},
 	title: {
 		fontSize: 22,
