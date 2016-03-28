@@ -275,9 +275,16 @@ module.exports = React.createClass({
 		});		
 	},
 	onPressSetInOutTime: async function(mode, options){
-		const {action, minute, hour} = await TimePickerAndroid.open(options);
+		var {action, minute, hour} = await TimePickerAndroid.open(options);
 		if(!(action === TimePickerAndroid.timeSetAction)){
 			return;
+		}
+		if(minute>15 && minute<30){
+			minute=30;
+		}
+		else if(minute>30){
+			minute=0;
+			hour++;
 		}
 		switch(mode){
 			case "IN"	: 	this.setState({ selectedInHour: parseInt(hour, 10), selectedInMinute: parseInt(minute, 10) });
@@ -298,16 +305,16 @@ module.exports = React.createClass({
 
 	},
 	getInHour: function(){
-		return this.state.selectedInHour === 0 ? "00" : this.state.selectedInHour;
+		return this.state.selectedInHour < 9 ? "0"+this.state.selectedInHour : this.state.selectedInHour;
 	},
 	getInMinute: function(){
-		return this.state.selectedInMinute === 0 ? "00" : this.state.selectedInMinute;
+		return this.state.selectedInMinute < 9 ? "0"+this.state.selectedInMinute : this.state.selectedInMinute;
 	},
 	getOutHour: function(){
-		return this.state.selectedOutHour === 0 ? "00" : this.state.selectedOutHour;
+		return this.state.selectedOutHour < 9 ? "0"+this.state.selectedOutHour : this.state.selectedOutHour;
 	},
 	getOutMinute: function(){
-		return this.state.selectedOutMinute === 0 ? "00" : this.state.selectedOutMinute;
+		return this.state.selectedOutMinute < 9 ? "0"+this.state.selectedOutMinute : this.state.selectedOutMinute;
 	},	
 });
 
