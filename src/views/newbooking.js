@@ -32,13 +32,13 @@ module.exports = React.createClass({
 			rawData: [],
 			loaded: false,
 			isReloadRequired: false,
+			title: '',
+			description: '',
 			selectedIndex: '',
 			selectedDate: Moment(),
 			minDate: new Date(),
-			selectedInHour: parseInt(roundToNextSlot(Moment()).format("HH"), 10),
-			selectedInMinute: parseInt(roundToNextSlot(Moment()).format("mm"), 10),
-			selectedOutHour: parseInt(Moment(roundToNextSlot(Moment())).add(30, "minutes").format("HH"), 10),
-			selectedOutMinute: parseInt(Moment(roundToNextSlot(Moment())).add(30, "minutes").format("mm"), 10)
+			selectedInTime: roundToNextSlot(Moment()).format("H:m"),
+			selectedOutTime: roundToNextSlot(Moment()).add(30, "minutes").format("H:m"),
 		}
 	},
 	componentDidMount: function(){
@@ -107,7 +107,7 @@ module.exports = React.createClass({
         			sidebarRef={this}
         			isChildView={true}
       			/>
-    			<ScrollView style={styles.body}>
+    			<ScrollView style={styles.body} keyboardShouldPersistTaps={true}>
     				<View style={styles.wizardWrapper}>
     					<View style={styles.wizardStep}>
 	    					<View style={styles.wizardStepTitle}>
@@ -128,9 +128,10 @@ module.exports = React.createClass({
 	    								style={styles.input}
 	    								autoCapitalize={'words'}
 	    								autoCorrect={false}
+	    								onChangeText={(text) =>this.setState({title: text})}
 	    							>
 	    							</TextInput>
-	    						</View>    					
+	    						</View>
 	    					</View>
     					</View>
     					<View style={styles.wizardStep}>
@@ -152,9 +153,10 @@ module.exports = React.createClass({
 	    								style={styles.input}
 	    								autoCapitalize={'sentences'}
 	    								autoCorrect={false}
+	    								onChangeText={(text) =>this.setState({description: text})}
 	    							>
 	    							</TextInput>
-	    						</View>    					
+	    						</View>
 	    					</View>
     					</View>
     					<View style={styles.wizardStep}>
@@ -178,7 +180,7 @@ module.exports = React.createClass({
 				    				>
 				    					{this.renderRoomList()}
 				    				</Picker>
-	    						</View>    					
+	    						</View>
 	    					</View>
     					</View>
     					<View style={styles.wizardStep}>
@@ -200,7 +202,7 @@ module.exports = React.createClass({
 				    						<Text style={styles.dateTime}>{this.state.selectedDate.format("MMMM Do YYYY")}</Text>
 				    					</TouchableHighlight>
 				    				</View>
-	    						</View>    					
+	    						</View>
 	    					</View>
     					</View>
     					<View style={styles.wizardStep}>
@@ -218,17 +220,35 @@ module.exports = React.createClass({
 	    						</View>
 	    						<View style={{flex: 5}}>
 				    				<View style={styles.timeWrapper}>
-				    					<TouchableHighlight onPress={this.onPressSetInOutTime.bind(this, "IN", {hour: this.state.selectedInHour, minute: this.state.selectedInMinute})} style={styles.selectedDateTimeTouchable} underlayColor={'#e5e5e5'}>
-				    						<Text style={styles.dateTime}>IN: <Text style={styles.selectedDateTime}>{this.getInHour()+":"+this.getInMinute()}</Text></Text>
+				    					<TouchableHighlight 
+				    						onPress={this.onPressSetInOutTime.bind(this, "IN", {hour: this._parseHour(this.state.selectedInTime), minute: this._parseMinute(this.state.selectedInTime)})} 
+				    						style={styles.selectedDateTimeTouchable} 
+				    						underlayColor={'#e5e5e5'}
+				    					>
+				    						<Text style={styles.dateTime}>IN: <Text style={styles.selectedDateTime}>{this._prettyPrintTime(this.state.selectedInTime)}</Text></Text>
 				    					</TouchableHighlight>
-				    					<TouchableHighlight onPress={this.onPressSetInOutTime.bind(this, "OUT", {hour: this.state.selectedOutHour, minute: this.state.selectedOutMinute})} style={styles.selectedDateTimeTouchable} underlayColor={'#e5e5e5'}>
-				    						<Text style={styles.dateTime}>OUT: <Text style={styles.selectedDateTime}>{this.getOutHour()+":"+this.getOutMinute()}</Text></Text>
+				    					<TouchableHighlight 
+				    						onPress={this.onPressSetInOutTime.bind(this, "OUT", {hour: this._parseHour(this.state.selectedOutTime), minute: this._parseMinute(this.state.selectedOutTime)})} 
+				    						style={styles.selectedDateTimeTouchable} 
+				    						underlayColor={'#e5e5e5'}
+				    					>
+				    						<Text style={styles.dateTime}>OUT: <Text style={styles.selectedDateTime}>{this._prettyPrintTime(this.state.selectedOutTime)}</Text></Text>
 				    					</TouchableHighlight>				    					
 				    				</View>
-	    						</View>    					
+				    				<Text style={styles.note}>Adjusted to the next half-hour interval.</Text>
+	    						</View>
 	    					</View>
-    					</View>    					
+    					</View>
+    					<View style={{flex: 1, justifyContent: 'flex-end', padding: 20, flexDirection: 'row'}}>
+    						<TouchableHighlight underlayColor={'#f5f5f5'} style={styles.buttonTouchable}>
+    							<Text style={[styles.button, styles.gray]}>CANCEL</Text>
+    						</TouchableHighlight>
+    						<TouchableHighlight underlayColor={'#f5f5f5'} style={styles.buttonTouchable}>
+    							<Text style={[styles.button, styles.blue]}>BOOK NOW</Text>
+    						</TouchableHighlight>
+    					</View>
     				</View>
+    				<View style={{padding: 7}}><Text></Text></View>
     			</ScrollView>
   			</View>
 		)
@@ -248,20 +268,30 @@ module.exports = React.createClass({
 	},
 	onPressSetInOutTime: async function(mode, options){
 		var {action, minute, hour} = await TimePickerAndroid.open(options);
+
 		if(!(action === TimePickerAndroid.timeSetAction)){
 			return;
 		}
-		if(minute>15 && minute<30){
+
+		if(minute>0 && minute<30){
 			minute=30;
 		}
-		else if(minute>30){
+		else if(minute>minute>30){
+			
 			minute=0;
-			hour++;
+			
+			if(hour===23){
+				hour=0;
+			}
+			else{
+				hour++;
+			}
 		}
+
 		switch(mode){
-			case "IN"	: 	this.setState({ selectedInHour: parseInt(hour, 10), selectedInMinute: parseInt(minute, 10) });
+			case "IN"	: 	this.setState({ selectedInTime: hour + ":" + minute });
 							break;
-			case "OUT"	: 	this.setState({ selectedOutHour: parseInt(hour, 10), selectedOutMinute: parseInt(minute, 10) });
+			case "OUT"	: 	this.setState({ selectedOutTime: hour + ":" + minute });
 							break;
 		}
 	},
@@ -276,18 +306,20 @@ module.exports = React.createClass({
 		this.setState({ selectedDate: Moment(date) });
 
 	},
-	getInHour: function(){
-		return this.state.selectedInHour < 9 ? "0"+this.state.selectedInHour : this.state.selectedInHour;
+	_parseHour: function(time){
+		return parseInt(time.slice(0, time.indexOf(":")));
 	},
-	getInMinute: function(){
-		return this.state.selectedInMinute < 9 ? "0"+this.state.selectedInMinute : this.state.selectedInMinute;
+	_parseMinute: function(time){
+		return parseInt(time.substr(time.indexOf(":") + 1));
 	},
-	getOutHour: function(){
-		return this.state.selectedOutHour < 9 ? "0"+this.state.selectedOutHour : this.state.selectedOutHour;
-	},
-	getOutMinute: function(){
-		return this.state.selectedOutMinute < 9 ? "0"+this.state.selectedOutMinute : this.state.selectedOutMinute;
-	},	
+	_prettyPrintTime: function(time){
+		var hour = this._parseHour(time);
+		var minute = this._parseMinute(time);
+
+		hour = hour < 9 ? "0" + hour : hour.toString();
+		minute = minute < 9 ? "0" + minute : minute.toString();
+		return hour + ":" + minute;
+	}
 });
 
 function roundToNextSlot(start){
@@ -303,7 +335,7 @@ const styles = StyleSheet.create({
 	body: {
 		flex: 1,
 		backgroundColor: '#e8e8e8',
-		padding: 10
+		padding: 10,
 	},
 	wizardWrapper: {
 		backgroundColor: '#ffffff',
@@ -339,4 +371,26 @@ const styles = StyleSheet.create({
 		height: 40,
 		fontSize: 16,
 	},
+	note: {
+		color: '#939393',
+		fontSize: 12,
+		fontStyle: 'italic'
+	},
+	button: {
+		borderRadius: 2,
+		marginTop: 5,
+		marginRight: 10,
+		marginBottom: 5,
+		marginLeft: 10,
+		fontSize: 15
+	},
+	buttonTouchable: {
+		borderRadius: 2
+	},
+	blue: {
+		color: '#0288D1',
+	},
+	gray: {
+		color: '#939393',
+	}
 })

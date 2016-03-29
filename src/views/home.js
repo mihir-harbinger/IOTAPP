@@ -95,7 +95,7 @@ module.exports = React.createClass({
 		if(this.state.isReloadRequired){
 			return this.renderReloadView();
 		}
-		if(!this.state.loaded){
+		if(this.state.loaded === false && this.state.isReloadRequired === false){
 			return this.renderLoadingView();
 		}
 
