@@ -30,6 +30,7 @@ module.exports = React.createClass({
 
 	getInitialState: function(){
 		return{
+			rawData: [],
 			dataSource: new ListView.DataSource({
           		rowHasChanged: (row1, row2) => row1 !== row2
         	}),
@@ -61,7 +62,7 @@ module.exports = React.createClass({
 	API: function(){
 
 		var _this = this;
-		this.setState({ isRefreshing: true, isEnabled: false, isReloadRequired: false, loaded: false });
+		this.setState({ rawData: [], isRefreshing: true, isEnabled: false, isReloadRequired: false, loaded: false });
 
 		Parse.Cloud.run('fetchListOfRooms', {}).then(
 
@@ -77,6 +78,7 @@ module.exports = React.createClass({
 
 				if(_this.isMounted()){
 					_this.setState({ 
+						rawData: _this.state.rawData.concat(cleanData),
 						dataSource: _this.state.dataSource.cloneWithRows(cleanData),
 						isRefreshing: false,
 						loaded: true,
@@ -121,22 +123,20 @@ module.exports = React.createClass({
         				enabled={this.state.isEnabled}
       				>	
             			<ScrollView style={styles.body}>
-            				<View style={styles.quickBooking}>
-            					<Image 
-            						source={require('../../assets/images/office.png')} 
-            						style={styles.canvas}
-            						resizeMode="cover"
-            					>
-            						<View style={styles.overlay}>
-            							<Text>Hi</Text>
-            						</View>
-            					</Image>
-            				</View>
             				<TouchableNativeFeedback onPress={this.onPressNewBooking}>
-            				<View style={styles.wrapper} accessible={true} elevation={1} >
-        						<Text style={styles.hint}>BOOK ON THE GO</Text>
-        						<Text>Hi there! Tap on this card to reserve a conference room now. Alternatively, you can go through the list beneath to see available slots.</Text>
-            				</View>
+	            				<View style={{flex: 1, backgroundColor: '#ffffff'}} elevation={1}>
+		            				<View style={styles.quickBooking}>
+		            					<Image 
+		            						source={require('../../assets/images/office.png')} 
+		            						style={styles.canvas}
+		            					>
+		            					</Image>
+		            				</View>
+		            				<View style={styles.wrapper}>
+			        						<Text style={styles.hint}>BOOK ON THE GO</Text>
+			        						<Text style={{marginTop: 5}}>Hi there! Tap on this card to reserve a conference room now. Alternatively, you can go through the list beneath to see available slots.</Text>
+		            				</View>
+		            			</View>
             				</TouchableNativeFeedback>
             				<View style={styles.roomListTitle}>
             					<Text style={styles.hint}>IOT POWERED ROOMS</Text>
@@ -169,7 +169,7 @@ module.exports = React.createClass({
 	    );
 	},
 	onPressNewBooking: function(){
-		this.props.navigator.push({name: 'newbooking'})
+		this.props.navigator.push({ name: 'newbooking', data: this.state.rawData })
 	}
 });
 
@@ -198,7 +198,6 @@ const styles = StyleSheet.create({
 	hint: {
 		fontSize: 15,
 		color: '#0288D1',
-		marginBottom: 5
 	},
 	leftSection: {
 		flex: 2,

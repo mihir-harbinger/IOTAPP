@@ -1,6 +1,7 @@
 var React = require('react-native');
 
 var {
+	InteractionManager,
   	TouchableHighlight,
   	TimePickerAndroid,
   	DatePickerAndroid,
@@ -39,62 +40,20 @@ module.exports = React.createClass({
 			selectedDate: new Date(),
 			selectedInTime: roundToNextSlot(Moment()).format("H:m"),
 			selectedOutTime: roundToNextSlot(Moment()).add(30, "minutes").format("H:m"),
+			errorTitle: '',
+			errorDescription: ''
 		}
 	},
 	componentDidMount: function(){
-		this.loadData();
-	},
-	loadData: function(){
-
-		var _this = this;
-		this.API();
-
-		setTimeout(function(){
-			if(_this.isMounted()){
-				if(_this.state.loaded===false){
-					_this.setState({
-						isReloadRequired: true,
-					})
-				}
-			}
-		}, 15000);
-	},
-	API: function(){
-		var _this = this;
-		this.setState({ isReloadRequired: false, loaded: false });
-
-		Parse.Cloud.run('fetchListOfRooms', {}).then(
-
-			function(result){
-
-				//Convert ParseObject to JSON; then push into an array.
-				var cleanData = [];
-				for(var i=0;i<result.length;i++){
-					cleanData.push(result[i].toJSON());
-				}
-
-				console.log("[NEW BOOKING API] Success: ", cleanData);
-
-				if(_this.isMounted()){
-					_this.setState({ 
-						rawData: cleanData,
-						loaded: true,
-						isReloadRequired: false,
-						selectedIndex: cleanData[0].room_mac_id,
-					});					
-				}
-			},
-			function(error){
-				_this.setState({ isReloadRequired: true, loaded: false })
-				console.log("[NEW BOOKING API] Error: "+ JSON.stringify(error, null, 2));
-			}
-		);		
+		InteractionManager.runAfterInteractions(() => {  
+			this.setState({
+				rawData: this.props.data,
+				loaded: true
+			})    
+		});
 	},
 	render: function(){
-		if(this.state.isReloadRequired){
-			return this.renderReloadView();
-		}
-		if(this.state.loaded === false && this.state.isReloadRequired === false){
+		if(!this.state.loaded){
 			return this.renderLoadingView();
 		}
 
@@ -118,7 +77,7 @@ module.exports = React.createClass({
 	    							<Icon name="looks-one" size={30} color="#0288D1" />
 	    						</View>
 	    						<View style={{flex: 5}}>
-	    							<Text style={{color: '#0288D1', fontSize: 15, marginTop: 3.7}}>Set Meeting Title</Text>
+	    							<Text style={styles.wizardStepText}>Set Meeting Title</Text>
 	    						</View>
 	    					</View>
 	    					<View style={styles.wizardstepAction}>
@@ -131,9 +90,10 @@ module.exports = React.createClass({
 	    								style={styles.input}
 	    								autoCapitalize={'words'}
 	    								autoCorrect={false}
-	    								onChangeText={(text) =>this.setState({title: text})}
+	    								onChangeText={(text) =>this.setState({title: text, errorTitle: ''})}
 	    							>
 	    							</TextInput>
+	    							<Text style={styles.errorMessage}>{this.state.errorTitle}</Text>
 	    						</View>
 	    					</View>
     					</View>
@@ -143,7 +103,7 @@ module.exports = React.createClass({
 	    							<Icon name="looks-two" size={30} color="#0288D1" />
 	    						</View>
 	    						<View style={{flex: 5}}>
-	    							<Text style={{color: '#0288D1', fontSize: 15, marginTop: 3.7}}>Set Meeting Description</Text>
+	    							<Text style={styles.wizardStepText}>Set Meeting Description</Text>
 	    						</View>
 	    					</View>
 	    					<View style={styles.wizardstepAction}>
@@ -156,9 +116,10 @@ module.exports = React.createClass({
 	    								style={styles.input}
 	    								autoCapitalize={'sentences'}
 	    								autoCorrect={false}
-	    								onChangeText={(text) =>this.setState({description: text})}
+	    								onChangeText={(text) =>this.setState({description: text, errorDescription: ''})}
 	    							>
 	    							</TextInput>
+	    							<Text style={styles.errorMessage}>{this.state.errorDescription}</Text>
 	    						</View>
 	    					</View>
     					</View>
@@ -168,7 +129,7 @@ module.exports = React.createClass({
 	    							<Icon name="looks-3" size={30} color="#0288D1" />
 	    						</View>
 	    						<View style={{flex: 5}}>
-	    							<Text style={{color: '#0288D1', fontSize: 15, marginTop: 3.7}}>Select Conference Room</Text>
+	    							<Text style={styles.wizardStepText}>Select Conference Room</Text>
 	    						</View>
 	    					</View>
 	    					<View style={styles.wizardstepAction}>
@@ -192,7 +153,7 @@ module.exports = React.createClass({
 	    							<Icon name="looks-4" size={30} color="#0288D1" />
 	    						</View>
 	    						<View style={{flex: 5}}>
-	    							<Text style={{color: '#0288D1', fontSize: 15, marginTop: 3.7}}>Select Desired Date</Text>
+	    							<Text style={styles.wizardStepText}>Select Desired Date</Text>
 	    						</View>
 	    					</View>
 	    					<View style={styles.wizardstepAction}>
@@ -214,7 +175,7 @@ module.exports = React.createClass({
 	    							<Icon name="looks-5" size={30} color="#0288D1" />
 	    						</View>
 	    						<View style={{flex: 5}}>
-	    							<Text style={{color: '#0288D1', fontSize: 15, marginTop: 3.7}}>Select In-Out Time</Text>
+	    							<Text style={styles.wizardStepText}>Select In-Out Time</Text>
 	    						</View>
 	    					</View>
 	    					<View style={styles.wizardstepAction}>
@@ -266,9 +227,6 @@ module.exports = React.createClass({
 	},
 	renderLoadingView: function(){
 		return <LoadingView title={'Home'} navigator={this.props.navigator}  />
-	},
-	renderReloadView: function(){
-		return <ReloadView title={'Home'} navigator={this.props.navigator} loadData={this.loadData} />
 	},
 	renderRoomList: function(){
 		return this.state.rawData.map(function(room){
@@ -329,6 +287,15 @@ module.exports = React.createClass({
 	onPressBook: function(){
 		var _this = this;
 
+		if(!this.state.title){
+			this.setState({errorTitle: 'You need a cool title!'});
+			return;
+		}
+		if(this.state.description.length < 10 && this.state.description.length > 0){
+			this.setState({errorDescription: 'Please provide a proper description.'});
+			return;
+		}
+		
 		var offset = Moment().utcOffset() / 60;
 
 		var _bookFromTime = parseFloat((this.state.selectedInTime).replace(":", "."));
@@ -407,6 +374,11 @@ const styles = StyleSheet.create({
 	wizardStepTitle: {
 		flexDirection: 'row',
 	},
+	wizardStepText: {
+		color: '#0288D1', 
+		fontSize: 15, 
+		marginTop: 4
+	},
 	wizardstepAction: {
 		flexDirection: 'row'
 	},
@@ -451,5 +423,11 @@ const styles = StyleSheet.create({
 	},
 	gray: {
 		color: '#939393',
+	},
+	errorMessage: {
+		color: '#ef5350',
+		fontSize: 12,
+		marginLeft: 3,
+		fontStyle: 'italic'
 	}
 })
