@@ -57,7 +57,7 @@ module.exports = React.createClass({
 					})
 				}
 			}
-		}, 10000);
+		}, 15000);
 	},
 	API: function(){
 		var _this = this;
@@ -109,6 +109,9 @@ module.exports = React.createClass({
       			/>
     			<ScrollView style={styles.body} keyboardShouldPersistTaps={true}>
     				<View style={styles.wizardWrapper}>
+    					<View style={styles.wizardStep}>
+    						<Text>Reservation Wizard</Text>
+    					</View>
     					<View style={styles.wizardStep}>
 	    					<View style={styles.wizardStepTitle}>
 	    						<View style={{flex: 1}}>
@@ -284,7 +287,7 @@ module.exports = React.createClass({
 		if(minute>0 && minute<30){
 			minute=30;
 		}
-		else if(minute>minute>30){
+		else if(minute>30){
 			
 			minute=0;
 			
@@ -326,11 +329,17 @@ module.exports = React.createClass({
 	onPressBook: function(){
 		var _this = this;
 
-		var _bookFromTime = this.state.selectedInTime;
-		var _bookToTime = this.state.selectedOutTime;
-		var _bookDate = this.state.selectedDate;
+		var offset = Moment().utcOffset() / 60;
+
+		var _bookFromTime = parseFloat((this.state.selectedInTime).replace(":", "."));
+		_bookFromTime-= offset;
+
+		var _bookToTime = parseFloat((this.state.selectedOutTime).replace(":", "."));
+		_bookToTime-= offset;
+
+		var _bookDate = Moment(this.state.selectedDate).format("D-M-YYYY");
 		var _roomMacId = this.state.selectedIndex;
-		var _userId = Parse.User.current().username;
+		var _userId = Parse.User.current().getUsername();
 		var _title = this.state.title;
 		var _description = this.state.description;
 		var _statusId = 1;
@@ -344,17 +353,17 @@ module.exports = React.createClass({
 				user_id: _userId,
 				title: _title,
 				description: _description,
-				statusid: _statusId
+				status_id: _statusId
 
 			}).then(
 
-			function(result){
-				console.log("[NEW BOOKING API] Success: "+ JSON.stringify(result, null, 2));
-			},
-			function(error){
-				console.log("[NEW BOOKING API] Error: "+ JSON.stringify(error, null, 2));
-			}
-		);		
+				function(result){
+					console.log("[NEW BOOKING API] Success: "+ JSON.stringify(result, null, 2));
+				},
+				function(error){
+					console.log("[NEW BOOKING API] Error: "+ JSON.stringify(error, null, 2));
+				}
+			);		
 	},
 	_parseHour: function(time){
 		return parseInt(time.slice(0, time.indexOf(":")));

@@ -2,6 +2,7 @@
 var React = require('react-native');
 
 var {
+	TouchableNativeFeedback,
   	PullToRefreshViewAndroid,
   	DrawerLayoutAndroid,
   	TouchableHighlight,
@@ -17,7 +18,6 @@ var {
 
 //get libraries
 var Parse = require('parse/react-native').Parse;
-var Moment = require('moment');
 
 //get components
 var ToolbarAfterLoad = require('../components/toolbarAfterLoad');
@@ -121,23 +121,24 @@ module.exports = React.createClass({
         				enabled={this.state.isEnabled}
       				>	
             			<ScrollView style={styles.body}>
-            				<TouchableHighlight 
-            					underlayColor={'#939393'} 
-            					style={styles.touchable}
-            					onPress={this.onPressNewBooking}
-            				>
-	            				<View style={styles.wrapper}>
-	            					<View style={styles.leftSection}>
-	            						<Text style={styles.hint}>BOOK ON THE GO</Text>
-	            						<Text style={styles.currentMonth}>{(Moment().format("MMM YYYY")).toUpperCase()}</Text>
-	            						<Text style={styles.location}>Global Port</Text>
-	            					</View>
-	            					<View style={styles.rightSection}>
-	            						<Image source={require('../../assets/images/work_transparent.png')} style={styles.bookNowImage}></Image>
-	            					</View>
-	            				</View>
-            				</TouchableHighlight>
-            				<View style={{ backgroundColor: '#ffffff', padding: 15, borderBottomColor: '#f5f5f5', borderBottomWidth: 1}}>
+            				<View style={styles.quickBooking}>
+            					<Image 
+            						source={require('../../assets/images/office.png')} 
+            						style={styles.canvas}
+            						resizeMode="cover"
+            					>
+            						<View style={styles.overlay}>
+            							<Text>Hi</Text>
+            						</View>
+            					</Image>
+            				</View>
+            				<TouchableNativeFeedback onPress={this.onPressNewBooking}>
+            				<View style={styles.wrapper} accessible={true} elevation={1} >
+        						<Text style={styles.hint}>BOOK ON THE GO</Text>
+        						<Text>Hi there! Tap on this card to reserve a conference room now. Alternatively, you can go through the list beneath to see available slots.</Text>
+            				</View>
+            				</TouchableNativeFeedback>
+            				<View style={styles.roomListTitle}>
             					<Text style={styles.hint}>IOT POWERED ROOMS</Text>
             				</View>
               				<ListView 
@@ -191,13 +192,13 @@ const styles = StyleSheet.create({
 	wrapper:{
 		padding: 15,
 		backgroundColor: '#ffffff',
-		borderRadius: 2,
-		flexDirection: 'row'
+		borderBottomLeftRadius: 2,
+		borderBottomRightRadius: 2,
 	},
 	hint: {
 		fontSize: 15,
 		color: '#0288D1',
-		marginTop: 2
+		marginBottom: 5
 	},
 	leftSection: {
 		flex: 2,
@@ -211,9 +212,6 @@ const styles = StyleSheet.create({
 		width: 90,
 		height: 83
 	},
-	currentMonth: {
-		fontSize: 32
-	},
 	description: {
 		fontSize: 15,
 		color: '#a5a5a5'
@@ -221,5 +219,29 @@ const styles = StyleSheet.create({
 	location: {
 		fontSize: 15,
 		color: '#a5a5a5'
+	},
+	quickBooking: {
+		flex: 1,
+    	height: 150,
+	},
+	canvas: {
+		flex: 1,
+		alignSelf: 'stretch',
+    	width: null,
+    	position: 'relative'
+	},
+	overlay: {
+		position: 'absolute',
+		top: 0,
+		bottom: 0,
+		left: 0,
+		right: 0
+	},
+	roomListTitle: { 
+		backgroundColor: '#ffffff', 
+		marginTop: 10, 
+		padding: 15, 
+		borderBottomColor: '#e8e8e8', 
+		borderBottomWidth: 1
 	}
 });
