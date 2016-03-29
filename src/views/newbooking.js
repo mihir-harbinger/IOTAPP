@@ -1,6 +1,7 @@
 var React = require('react-native');
 
 var {
+	TouchableNativeFeedback,
 	InteractionManager,
   	TouchableHighlight,
   	TimePickerAndroid,
@@ -69,22 +70,9 @@ module.exports = React.createClass({
     			<ScrollView style={styles.body} keyboardShouldPersistTaps={true}>
     				<View style={styles.wizardWrapper}>
     					<View style={styles.wizardStep}>
-    						<Text>Reservation Wizard</Text>
-    					</View>
-    					<View style={styles.wizardStep}>
-	    					<View style={styles.wizardStepTitle}>
-	    						<View style={{flex: 1}}>
-	    							<Icon name="looks-one" size={30} color="#0288D1" />
-	    						</View>
-	    						<View style={{flex: 5}}>
-	    							<Text style={styles.wizardStepText}>Set Meeting Title</Text>
-	    						</View>
-	    					</View>
+	    					<Text style={styles.wizardStepText}>Meeting Title</Text>
 	    					<View style={styles.wizardstepAction}>
 	    						<View style={{flex: 1}}>
-	    							<Icon name="looks-one" size={30} color="#ffffff" />
-	    						</View>
-	    						<View style={{flex: 5}}>
 	    							<TextInput 
 	    								underlineColorAndroid={'#cccccc'} 
 	    								style={styles.input}
@@ -98,19 +86,9 @@ module.exports = React.createClass({
 	    					</View>
     					</View>
     					<View style={styles.wizardStep}>
-	    					<View style={styles.wizardStepTitle}>
-	    						<View style={{flex: 1}}>
-	    							<Icon name="looks-two" size={30} color="#0288D1" />
-	    						</View>
-	    						<View style={{flex: 5}}>
-	    							<Text style={styles.wizardStepText}>Set Meeting Description</Text>
-	    						</View>
-	    					</View>
+	    					<Text style={styles.wizardStepText}>Meeting Description</Text>
 	    					<View style={styles.wizardstepAction}>
 	    						<View style={{flex: 1}}>
-	    							<Icon name="looks-two" size={30} color="#ffffff" />
-	    						</View>
-	    						<View style={{flex: 5}}>
 	    							<TextInput 
 	    								underlineColorAndroid={'#cccccc'} 
 	    								style={styles.input}
@@ -124,19 +102,9 @@ module.exports = React.createClass({
 	    					</View>
     					</View>
     					<View style={styles.wizardStep}>
-	    					<View style={styles.wizardStepTitle}>
-	    						<View style={{flex: 1}}>
-	    							<Icon name="looks-3" size={30} color="#0288D1" />
-	    						</View>
-	    						<View style={{flex: 5}}>
-	    							<Text style={styles.wizardStepText}>Select Conference Room</Text>
-	    						</View>
-	    					</View>
+	    					<Text style={styles.wizardStepText}>Conference Room</Text>
 	    					<View style={styles.wizardstepAction}>
 	    						<View style={{flex: 1}}>
-	    							<Icon name="looks-3" size={30} color="#ffffff" />
-	    						</View>
-	    						<View style={{flex: 5}}>
 				    				<Picker 
 				    					mode={"dropdown"} 
 				    					selectedValue={this.state.selectedIndex}
@@ -148,19 +116,9 @@ module.exports = React.createClass({
 	    					</View>
     					</View>
     					<View style={styles.wizardStep}>
-	    					<View style={styles.wizardStepTitle}>
-	    						<View style={{flex: 1}}>
-	    							<Icon name="looks-4" size={30} color="#0288D1" />
-	    						</View>
-	    						<View style={{flex: 5}}>
-	    							<Text style={styles.wizardStepText}>Select Desired Date</Text>
-	    						</View>
-	    					</View>
+	    					<Text style={styles.wizardStepText}>Desired Date</Text>
 	    					<View style={styles.wizardstepAction}>
 	    						<View style={{flex: 1}}>
-	    							<Icon name="looks-4" size={30} color="#ffffff" />
-	    						</View>
-	    						<View style={{flex: 5}}>
 				    				<View style={styles.timeWrapper}>
 				    					<TouchableHighlight onPress={this.onPressSetDate.bind(this, 'min', {date: this.state.selectedDate, minDate: new Date()})} style={styles.selectedDateTimeTouchable} underlayColor={'#e5e5e5'}>
 				    						<Text style={styles.dateTime}>{Moment(this.state.selectedDate).format("MMMM Do YYYY")}</Text>
@@ -170,19 +128,17 @@ module.exports = React.createClass({
 	    					</View>
     					</View>
     					<View style={styles.wizardStep}>
-	    					<View style={styles.wizardStepTitle}>
-	    						<View style={{flex: 1}}>
-	    							<Icon name="looks-5" size={30} color="#0288D1" />
-	    						</View>
-	    						<View style={{flex: 5}}>
-	    							<Text style={styles.wizardStepText}>Select In-Out Time</Text>
-	    						</View>
-	    					</View>
+    						<View style={{flexDirection: 'row'}}>
+    							<Text style={styles.wizardStepText}>In-Out Time </Text>
+    							<TouchableHighlight 
+    								onPress={this.onPressHelp}
+    								underlayColor={'#e5e5e5'}
+    							>
+    								<Text style={styles.wizardStepText}>[?]</Text>
+    							</TouchableHighlight>
+    						</View>
 	    					<View style={styles.wizardstepAction}>
 	    						<View style={{flex: 1}}>
-	    							<Icon name="looks-5" size={30} color="#ffffff" />
-	    						</View>
-	    						<View style={{flex: 5}}>
 				    				<View style={styles.timeWrapper}>
 				    					<TouchableHighlight 
 				    						onPress={this.onPressSetInOutTime.bind(this, "IN", {hour: this._parseHour(this.state.selectedInTime), minute: this._parseMinute(this.state.selectedInTime)})} 
@@ -199,7 +155,6 @@ module.exports = React.createClass({
 				    						<Text style={styles.dateTime}>OUT: <Text style={styles.selectedDateTime}>{this._prettyPrintTime(this.state.selectedOutTime)}</Text></Text>
 				    					</TouchableHighlight>				    					
 				    				</View>
-				    				<Text style={styles.note}>Adjusted to the next half-hour interval.</Text>
 	    						</View>
 	    					</View>
     					</View>
@@ -279,8 +234,8 @@ module.exports = React.createClass({
 			"Confirmation", 
 			"Are you sure you want to cancel?",
             [
-            	{text: 'Yes', onPress: () => _this.props.navigator.pop()},
-              	{text: 'No', onPress: () => console.log('Cancel Pressed!')}
+              	{text: 'No', onPress: () => console.log('OK Pressed!')},
+              	{text: 'Yes', onPress: () => _this.props.navigator.pop()}
             ]
 		)
 	},
@@ -332,6 +287,16 @@ module.exports = React.createClass({
 				}
 			);		
 	},
+	onPressHelp: function(){
+		var _this = this;
+		Alert.alert(
+			"What's wrong with the time?",
+			"Your time is automatically adjusted to the next half-hour slot.",
+            [
+              	{text: 'OK', onPress: () => console.log('Cancel Pressed!')}
+            ]
+		);		
+	},
 	_parseHour: function(time){
 		return parseInt(time.slice(0, time.indexOf(":")));
 	},
@@ -360,8 +325,7 @@ const styles = StyleSheet.create({
 	},
 	body: {
 		flex: 1,
-		backgroundColor: '#e8e8e8',
-		padding: 10,
+		backgroundColor: '#ffffff'
 	},
 	wizardWrapper: {
 		backgroundColor: '#ffffff',
@@ -375,7 +339,7 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 	},
 	wizardStepText: {
-		color: '#0288D1', 
+		color: '#939393', 
 		fontSize: 15, 
 		marginTop: 4
 	},
@@ -428,6 +392,5 @@ const styles = StyleSheet.create({
 		color: '#ef5350',
 		fontSize: 12,
 		marginLeft: 3,
-		fontStyle: 'italic'
 	}
 })
