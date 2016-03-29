@@ -10,6 +10,7 @@ var {
   	ListView,
   	Platform,
   	Picker,
+  	Alert,
   	Image,
   	Text,
   	View
@@ -35,8 +36,7 @@ module.exports = React.createClass({
 			title: '',
 			description: '',
 			selectedIndex: '',
-			selectedDate: Moment(),
-			minDate: new Date(),
+			selectedDate: new Date(),
 			selectedInTime: roundToNextSlot(Moment()).format("H:m"),
 			selectedOutTime: roundToNextSlot(Moment()).add(30, "minutes").format("H:m"),
 		}
@@ -198,8 +198,8 @@ module.exports = React.createClass({
 	    						</View>
 	    						<View style={{flex: 5}}>
 				    				<View style={styles.timeWrapper}>
-				    					<TouchableHighlight onPress={this.onPressSetDate.bind(this, 'min', {date: this.state.minDate, minDate: new Date()})} style={styles.selectedDateTimeTouchable} underlayColor={'#e5e5e5'}>
-				    						<Text style={styles.dateTime}>{this.state.selectedDate.format("MMMM Do YYYY")}</Text>
+				    					<TouchableHighlight onPress={this.onPressSetDate.bind(this, 'min', {date: this.state.selectedDate, minDate: new Date()})} style={styles.selectedDateTimeTouchable} underlayColor={'#e5e5e5'}>
+				    						<Text style={styles.dateTime}>{Moment(this.state.selectedDate).format("MMMM Do YYYY")}</Text>
 				    					</TouchableHighlight>
 				    				</View>
 	    						</View>
@@ -240,10 +240,18 @@ module.exports = React.createClass({
 	    					</View>
     					</View>
     					<View style={{flex: 1, justifyContent: 'flex-end', padding: 20, flexDirection: 'row'}}>
-    						<TouchableHighlight underlayColor={'#f5f5f5'} style={styles.buttonTouchable}>
+    						<TouchableHighlight 
+    							underlayColor={'#f5f5f5'} 
+    							style={styles.buttonTouchable}
+    							onPress={this.onPressCancel}
+    						>
     							<Text style={[styles.button, styles.gray]}>CANCEL</Text>
     						</TouchableHighlight>
-    						<TouchableHighlight underlayColor={'#f5f5f5'} style={styles.buttonTouchable}>
+    						<TouchableHighlight 
+    							underlayColor={'#f5f5f5'} 
+    							style={styles.buttonTouchable}
+    							onPress={this.onPressBook}
+    						>
     							<Text style={[styles.button, styles.blue]}>BOOK NOW</Text>
     						</TouchableHighlight>
     					</View>
@@ -302,9 +310,51 @@ module.exports = React.createClass({
 		}
 		var dateString = year + "-" + ((month+1)<10 ? "0"+(month+1) : month+1) + "-" + (day < 10 ? "0"+day : day);
 		var date = new Date(dateString);
-		console.log(dateString);
-		this.setState({ selectedDate: Moment(date) });
+		this.setState({ selectedDate: date });
+	},
+	onPressCancel: function(){
+		var _this = this;
+		Alert.alert(
+			"Confirmation", 
+			"Are you sure you want to cancel?",
+            [
+            	{text: 'Yes', onPress: () => _this.props.navigator.pop()},
+              	{text: 'No', onPress: () => console.log('Cancel Pressed!')}
+            ]
+		)
+	},
+	onPressBook: function(){
+		var _this = this;
 
+		var _bookFromTime = this.state.selectedInTime;
+		var _bookToTime = this.state.selectedOutTime;
+		var _bookDate = this.state.selectedDate;
+		var _roomMacId = this.state.selectedIndex;
+		var _userId = Parse.User.current().username;
+		var _title = this.state.title;
+		var _description = this.state.description;
+		var _statusId = 1;
+
+		Parse.Cloud.run('bookRoomFromAppCloudFunction', 
+			{
+				book_fromtime: _bookFromTime,
+				book_totime: _bookToTime,
+				book_date: _bookDate,
+				room_mac_id: _roomMacId,
+				user_id: _userId,
+				title: _title,
+				description: _description,
+				statusid: _statusId
+
+			}).then(
+
+			function(result){
+				console.log("[NEW BOOKING API] Success: "+ JSON.stringify(result, null, 2));
+			},
+			function(error){
+				console.log("[NEW BOOKING API] Error: "+ JSON.stringify(error, null, 2));
+			}
+		);		
 	},
 	_parseHour: function(time){
 		return parseInt(time.slice(0, time.indexOf(":")));
