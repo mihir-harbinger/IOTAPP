@@ -7,6 +7,7 @@ var {
 	StyleSheet,
 	Navigator,
 	Image,
+	Alert,
 	View,
 	Text
 } = React;
@@ -20,6 +21,8 @@ var Signin = require('./views/signin');
 var Signup = require('./views/signup');
 var Home = require('./views/home');
 var NewBooking = require('./views/newbooking');
+var Success = require('./views/success');
+var About = require('./views/about');
 
 //Registering top level views
 var ROUTES = {
@@ -27,10 +30,12 @@ var ROUTES = {
 	signin: Signin,
 	signup: Signup,
 	home: Home,
-	newbooking: NewBooking
+	newbooking: NewBooking,
+	success: Success,
+	about: About
 };
 
-var _navigator;
+var _navigator, _route;
 
 module.exports = React.createClass({
 	componentWillMount: function(){
@@ -39,7 +44,6 @@ module.exports = React.createClass({
     render: function(){
 
         return(
-
         	//Render first view through initialRoute
 			<Navigator 
 				style={styles.container} 
@@ -53,6 +57,7 @@ module.exports = React.createClass({
     renderScene: function(route, navigator){
 		
 		_navigator = navigator;
+		_route = route;
 
 		//ROUTES['signin'] => SignIn
 		var Component = ROUTES[route.name]; 
@@ -73,9 +78,29 @@ const styles = StyleSheet.create({
 });
 
 BackAndroid.addEventListener('hardwareBackPress', () => {
+
+	var flag = false;
+
+	if(_route.name==="newbooking"){
+		Alert.alert(
+			"Confirmation", 
+			"Are you sure you want to cancel?",
+            [
+              	{text: 'No', onPress: () => console.log('OK Pressed!')},
+              	{text: 'Yes', onPress: () => {_navigator.pop();}}
+            ]
+		);
+		return true;
+	}
+	else{
+		flag = true;
+	}
 	if (_navigator.getCurrentRoutes().length === 1  ) {
     	return false;
   	}
-  	_navigator.pop();
-  	return true;
+  	if(flag){
+  		_navigator.pop();
+  		return true;
+  	}
+
 });

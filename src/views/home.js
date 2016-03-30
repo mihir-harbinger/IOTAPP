@@ -116,38 +116,31 @@ module.exports = React.createClass({
             			sidebarRef={this}
             			isChildView={false}
           			/>
-	      			<PullToRefreshViewAndroid 
-    	    			style={styles.container}
-        				refeshing={this.state.isRefreshing}
-        				onRefresh={this.fetchData}
-        				enabled={this.state.isEnabled}
-      				>	
-            			<ScrollView style={styles.body}>
-            				<TouchableNativeFeedback onPress={this.onPressNewBooking}>
-	            				<View style={{flex: 1, backgroundColor: '#ffffff'}} elevation={1}>
-		            				<View style={styles.quickBooking}>
-		            					<Image 
-		            						source={require('../../assets/images/office.png')} 
-		            						style={styles.canvas}
-		            					>
-		            					</Image>
-		            				</View>
-		            				<View style={styles.wrapper}>
-			        						<Text style={styles.hint}>BOOK ON THE GO</Text>
-			        						<Text style={{marginTop: 5}}>Hi there! Tap on this card to reserve a conference room now. Alternatively, you can go through the list beneath to see available slots.</Text>
-		            				</View>
-		            			</View>
-            				</TouchableNativeFeedback>
-            				<View style={styles.roomListTitle}>
-            					<Text style={styles.hint}>IOT POWERED ROOMS</Text>
-            				</View>
-              				<ListView 
-	            				dataSource={this.state.dataSource}
-                    			renderRow={this.renderRoom}
-                    			style={styles.listView}
-                    		/>
-            			</ScrollView>
-          			</PullToRefreshViewAndroid>
+        			<ScrollView style={styles.body}>
+        				<TouchableNativeFeedback onPress={this.onPressNewBooking}>
+            				<View style={{flex: 1, backgroundColor: '#ffffff'}} elevation={1}>
+	            				<View style={styles.quickBooking}>
+	            					<Image 
+	            						source={require('../../assets/images/office.png')} 
+	            						style={styles.canvas}
+	            					>
+	            					</Image>
+	            				</View>
+	            				<View style={styles.wrapper}>
+		        						<Text style={styles.hint}>BOOK ON THE GO</Text>
+		        						<Text style={{marginTop: 5}}>Hi there! Tap on this card to reserve a conference room now. Alternatively, you can go through the list beneath to see available slots.</Text>
+	            				</View>
+	            			</View>
+        				</TouchableNativeFeedback>
+        				<View style={styles.roomListTitle}>
+        					<Text style={styles.hint}>IOT POWERED ROOMS</Text>
+        				</View>
+          				<ListView 
+            				dataSource={this.state.dataSource}
+                			renderRow={this.renderRoom}
+                			style={styles.listView}
+                		/>
+        			</ScrollView>
       			</View>
       		</DrawerLayoutAndroid>
     	);

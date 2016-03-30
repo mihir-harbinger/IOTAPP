@@ -42,7 +42,9 @@ module.exports = React.createClass({
 			selectedInTime: roundToNextSlot(Moment()).format("H:m"),
 			selectedOutTime: roundToNextSlot(Moment()).add(30, "minutes").format("H:m"),
 			errorTitle: '',
-			errorDescription: ''
+			errorDescription: '',
+			disableSubmit: false,
+			buttonColor: '#0288D1'
 		}
 	},
 	componentDidMount: function(){
@@ -171,11 +173,13 @@ module.exports = React.createClass({
     							style={styles.buttonTouchable}
     							onPress={this.onPressBook}
     						>
-    							<Text style={[styles.button, styles.blue]}>BOOK NOW</Text>
+    							<Text style={[styles.button, {color: this.state.buttonColor}]}>BOOK NOW</Text>
     						</TouchableHighlight>
     					</View>
     				</View>
-    				<View style={{padding: 7}}><Text></Text></View>
+    				<View style={{margin: 7}}>
+    					<Text></Text>
+    				</View>
     			</ScrollView>
   			</View>
 		)
@@ -240,6 +244,10 @@ module.exports = React.createClass({
 		)
 	},
 	onPressBook: function(){
+
+		if(this.state.disableSubmit){
+			return;
+		}
 		var _this = this;
 
 		if(!this.state.title){
@@ -250,21 +258,17 @@ module.exports = React.createClass({
 			this.setState({errorDescription: 'Please provide a proper description.'});
 			return;
 		}
-		
-		var offset = Moment().utcOffset() / 60;
 
-		var _bookFromTime = parseFloat((this.state.selectedInTime).replace(":", "."));
-		_bookFromTime-= offset;
-
-		var _bookToTime = parseFloat((this.state.selectedOutTime).replace(":", "."));
-		_bookToTime-= offset;
-
+		var _bookFromTime = parseFloat(Moment(this.state.selectedInTime, "H:m").subtract(Moment().utcOffset(), "minutes").format("H.mm"));
+		var _bookToTime = parseFloat(Moment(this.state.selectedOutTime, "H:m").subtract(Moment().utcOffset(), "minutes").format("H.mm"));
 		var _bookDate = Moment(this.state.selectedDate).format("D-M-YYYY");
 		var _roomMacId = this.state.selectedIndex;
 		var _userId = Parse.User.current().getUsername();
 		var _title = this.state.title;
 		var _description = this.state.description;
 		var _statusId = 1;
+
+		this.setState({ disableSubmit: true, buttonColor: '#939393' });
 
 		Parse.Cloud.run('bookRoomFromAppCloudFunction', 
 			{
@@ -280,12 +284,15 @@ module.exports = React.createClass({
 			}).then(
 
 				function(result){
+					_this.props.navigator.replace({name: 'success', data: { date: Moment(_bookDate, "D-M-YYYY").format("MMMM Do YYYY"),}});
 					console.log("[NEW BOOKING API] Success: "+ JSON.stringify(result, null, 2));
+
 				},
 				function(error){
+					this.setState({ disableSubmit: false, buttonColor: '#0288D1' });
 					console.log("[NEW BOOKING API] Error: "+ JSON.stringify(error, null, 2));
 				}
-			);		
+			);
 	},
 	onPressHelp: function(){
 		var _this = this;
@@ -310,7 +317,7 @@ module.exports = React.createClass({
 		hour = hour < 9 ? "0" + hour : hour.toString();
 		minute = minute < 9 ? "0" + minute : minute.toString();
 		return hour + ":" + minute;
-	}
+	},
 });
 
 function roundToNextSlot(start){
@@ -325,7 +332,8 @@ const styles = StyleSheet.create({
 	},
 	body: {
 		flex: 1,
-		backgroundColor: '#ffffff'
+		backgroundColor: '#e8e8e8',
+		padding: 10
 	},
 	wizardWrapper: {
 		backgroundColor: '#ffffff',

@@ -21,8 +21,11 @@ module.exports = React.createClass({
 		)		
 	},
 	_onActionSelected: function(position){
-		if(position === 2){
-			this.props.navigator.immediatelyResetRouteStack([{name: 'signin'}]);
+		switch(position){
+			case 0: this.props.navigator.push({name: 'about'});
+					break;
+			case 2: this.props.navigator.immediatelyResetRouteStack([{name: 'signin'}]);			
+					break;
 		}
 	},
 	_onIconClicked: function(){
