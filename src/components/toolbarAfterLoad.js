@@ -16,6 +16,7 @@ module.exports = React.createClass({
             	actions={[{title: 'About App', show: 'never'}, {title: 'Settings', show: 'never'}, {title: 'Logout', show: 'never'}]}
             	onActionSelected={this._onActionSelected}
             	onIconClicked={this._onIconClicked}
+            	elevation={3}
           	>
           	</ToolbarAndroid>			
 		)		

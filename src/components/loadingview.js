@@ -14,7 +14,7 @@ module.exports = React.createClass({
 		return(
 			<View style={styles.container}>
 	      		<ToolbarBeforeLoad
-	      			navIcon={require('../../assets/images/stack.png')}
+	      			navIcon={this.props.navIcon}
 	        		title={this.props.title}
 	        		navigator={this.props.navigator}
 	        		isChildView={false}

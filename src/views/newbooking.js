@@ -177,15 +177,12 @@ module.exports = React.createClass({
     						</TouchableHighlight>
     					</View>
     				</View>
-    				<View style={{margin: 7}}>
-    					<Text></Text>
-    				</View>
     			</ScrollView>
   			</View>
 		)
 	},
 	renderLoadingView: function(){
-		return <LoadingView title={'Home'} navigator={this.props.navigator}  />
+		return <LoadingView title={'New Booking'} navigator={this.props.navigator} navIcon={require('../../assets/images/arrow_back.png')} />
 	},
 	renderRoomList: function(){
 		return this.state.rawData.map(function(room){
@@ -268,31 +265,41 @@ module.exports = React.createClass({
 		var _description = this.state.description;
 		var _statusId = 1;
 
-		this.setState({ disableSubmit: true, buttonColor: '#939393' });
+		//this.setState({ disableSubmit: true, buttonColor: '#939393' });
 
-		Parse.Cloud.run('bookRoomFromAppCloudFunction', 
-			{
-				book_fromtime: _bookFromTime,
-				book_totime: _bookToTime,
-				book_date: _bookDate,
-				room_mac_id: _roomMacId,
-				user_id: _userId,
-				title: _title,
-				description: _description,
-				status_id: _statusId
+		Parse.Cloud.run('searchRoomListForAvailableTime', {
+			bookfromtime: _bookFromTime,
+			booktotime: _bookToTime,
+			bookdate: _bookDate
+		}).then(
+			function(result){
+				console.log("[NEW BOOKING API] Success: "+ JSON.stringify(result, null, 2));
+			},
+			function(error){
+				//this.setState({ disableSubmit: false, buttonColor: '#0288D1' });
+				console.log("[NEW BOOKING API] Error: "+ JSON.stringify(error, null, 2));
+			}			
+		);
 
-			}).then(
-
-				function(result){
-					_this.props.navigator.replace({name: 'success', data: { date: Moment(_bookDate, "D-M-YYYY").format("MMMM Do YYYY"),}});
-					console.log("[NEW BOOKING API] Success: "+ JSON.stringify(result, null, 2));
-
-				},
-				function(error){
-					this.setState({ disableSubmit: false, buttonColor: '#0288D1' });
-					console.log("[NEW BOOKING API] Error: "+ JSON.stringify(error, null, 2));
-				}
-			);
+		Parse.Cloud.run('bookRoomFromAppCloudFunction', {
+			book_fromtime: _bookFromTime,
+			book_totime: _bookToTime,
+			book_date: _bookDate,
+			room_mac_id: _roomMacId,
+			user_id: _userId,
+			title: _title,
+			description: _description,
+			status_id: _statusId
+		}).then(
+			function(result){
+				_this.props.navigator.replace({name: 'success', data: { date: Moment(_bookDate, "D-M-YYYY").format("MMMM Do YYYY"),}});
+				console.log("[NEW BOOKING API] Success: "+ JSON.stringify(result, null, 2));
+			},
+			function(error){
+				this.setState({ disableSubmit: false, buttonColor: '#0288D1' });
+				console.log("[NEW BOOKING API] Error: "+ JSON.stringify(error, null, 2));
+			}
+		);
 	},
 	onPressHelp: function(){
 		var _this = this;
@@ -332,8 +339,7 @@ const styles = StyleSheet.create({
 	},
 	body: {
 		flex: 1,
-		backgroundColor: '#e8e8e8',
-		padding: 10
+		backgroundColor: '#ffffff',
 	},
 	wizardWrapper: {
 		backgroundColor: '#ffffff',
@@ -341,7 +347,7 @@ const styles = StyleSheet.create({
 	wizardStep: {
 		borderBottomWidth: 1,
 		borderBottomColor: '#f5f5f5',
-		padding: 15,
+		padding: 20,
 	},
 	wizardStepTitle: {
 		flexDirection: 'row',

@@ -26,6 +26,9 @@ var ReloadView = require('../components/reloadview');
 var Icon = require('react-native-vector-icons/MaterialIcons');
 var Room = require('../components/room');
 
+//get assets
+var OfficeImage = require('../../assets/images/office.png');
+
 module.exports = React.createClass({
 
 	getInitialState: function(){
@@ -121,7 +124,7 @@ module.exports = React.createClass({
             				<View style={{flex: 1, backgroundColor: '#ffffff'}} elevation={1}>
 	            				<View style={styles.quickBooking}>
 	            					<Image 
-	            						source={require('../../assets/images/office.png')} 
+	            						source={OfficeImage} 
 	            						style={styles.canvas}
 	            					>
 	            					</Image>
@@ -146,7 +149,7 @@ module.exports = React.createClass({
     	);
 	},
 	renderLoadingView: function(){
-		return <LoadingView title={'Home'} navigator={this.props.navigator}  />
+		return <LoadingView title={'Home'} navigator={this.props.navigator}  navIcon={require('../../assets/images/stack.png')} />
 	},
 	renderReloadView: function(){
 		return <ReloadView title={'Home'} navigator={this.props.navigator} loadData={this.loadData} />
@@ -158,7 +161,12 @@ module.exports = React.createClass({
 	},
 	renderNavigationView: function(){
 	    return(
-			<View style={[styles.container, {backgroundColor: '#cccccc'}]}></View>
+			<View style={[styles.container, {backgroundColor: '#3d4955'}]}>
+				<View style={styles.sidebarHeader}>
+					
+				</View>
+				<View style={styles.sidebarBody}></View>
+			</View>
 	    );
 	},
 	onPressNewBooking: function(){
@@ -235,5 +243,12 @@ const styles = StyleSheet.create({
 		padding: 15, 
 		borderBottomColor: '#e8e8e8', 
 		borderBottomWidth: 1
+	},
+	sidebarHeader: {
+		flex: 1,
+		backgroundColor: '#ffffff'
+	},
+	sidebarBody: {
+		flex: 3
 	}
 });

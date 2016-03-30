@@ -9,6 +9,7 @@ var {
 } = React;
 
 var ToolbarAfterLoad = require('../components/toolbarAfterLoad');
+var FooterImage = require('../../assets/images/about.png');
 
 module.exports = React.createClass({
 	render: function(){
@@ -35,7 +36,7 @@ module.exports = React.createClass({
     			</ScrollView>
 				<View style={styles.wrapper}>
 					<View style={styles.footer}>
-						<Image source={require('../../assets/images/about.png')} style={styles.canvas} />
+						<Image source={FooterImage} style={styles.canvas} />
 					</View>
 				</View>    			
 			</View>
