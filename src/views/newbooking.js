@@ -267,12 +267,39 @@ module.exports = React.createClass({
 
 		//this.setState({ disableSubmit: true, buttonColor: '#939393' });
 
+		var flag = false;
+
 		Parse.Cloud.run('searchRoomListForAvailableTime', {
 			bookfromtime: _bookFromTime,
 			booktotime: _bookToTime,
 			bookdate: _bookDate
 		}).then(
 			function(result){
+
+				var roomList = [];
+
+				for(var i=0;i<result.length;i++){
+					if(result[i].room_mac_id===_roomMacId){
+						flag=true;
+					}
+					else{
+						roomList.push(result[i].room_name);
+					}
+				}
+				var roomStr;
+				roomList.map(function(room){
+					roomStr+=room + " ";
+				});
+				
+				if(!flag){
+					Alert.alert(
+						"Room Unavailable",
+						"Perhaps, try changing your time or room?",
+			            [
+			              	{text: 'OK', onPress: () => console.log('OK Pressed!')}
+			            ]
+					)
+				}
 				console.log("[NEW BOOKING API] Success: "+ JSON.stringify(result, null, 2));
 			},
 			function(error){
@@ -280,6 +307,7 @@ module.exports = React.createClass({
 				console.log("[NEW BOOKING API] Error: "+ JSON.stringify(error, null, 2));
 			}			
 		);
+		return;
 
 		Parse.Cloud.run('bookRoomFromAppCloudFunction', {
 			book_fromtime: _bookFromTime,
