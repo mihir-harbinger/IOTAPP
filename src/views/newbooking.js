@@ -245,7 +245,6 @@ module.exports = React.createClass({
 		if(this.state.disableSubmit){
 			return;
 		}
-		var _this = this;
 
 		if(!this.state.title){
 			this.setState({errorTitle: 'You need a cool title!'});
@@ -255,6 +254,8 @@ module.exports = React.createClass({
 			this.setState({errorDescription: 'Please provide a proper description.'});
 			return;
 		}
+
+		var _this = this;
 
 		var _bookFromTime = parseFloat(Moment(this.state.selectedInTime, "H:m").subtract(Moment().utcOffset(), "minutes").format("H.mm"));
 		var _bookToTime = parseFloat(Moment(this.state.selectedOutTime, "H:m").subtract(Moment().utcOffset(), "minutes").format("H.mm"));
@@ -267,8 +268,6 @@ module.exports = React.createClass({
 
 		//this.setState({ disableSubmit: true, buttonColor: '#939393' });
 
-		var flag = false;
-
 		Parse.Cloud.run('searchRoomListForAvailableTime', {
 			bookfromtime: _bookFromTime,
 			booktotime: _bookToTime,
@@ -276,9 +275,9 @@ module.exports = React.createClass({
 		}).then(
 			function(result){
 
-				var roomList = [];
-
-				for(var i=0;i<result.length;i++){
+				var i, j, roomList=[], roomStr='', flag=false, base = "Perhaps, try changing the room? ";
+				
+				for(i=0;i<result.length;i++){
 					if(result[i].room_mac_id===_roomMacId){
 						flag=true;
 					}
@@ -286,15 +285,13 @@ module.exports = React.createClass({
 						roomList.push(result[i].room_name);
 					}
 				}
-				var roomStr;
-				roomList.map(function(room){
-					roomStr+=room + " ";
-				});
 				
 				if(!flag){
+					roomStr = roomList.join(",");
+					roomStr = roomList.length > 1 ? base+roomStr+" are available." : base+roomStr+" is available.";
 					Alert.alert(
 						"Room Unavailable",
-						"Perhaps, try changing your time or room?",
+						roomStr,
 			            [
 			              	{text: 'OK', onPress: () => console.log('OK Pressed!')}
 			            ]
