@@ -1,6 +1,7 @@
 var React = require('react-native');
 
 var {
+	InteractionManager,
 	ScrollView,
 	StyleSheet,
 	Image,
@@ -9,9 +10,20 @@ var {
 } = React;
 
 var ToolbarAfterLoad = require('../components/toolbarAfterLoad');
-var FooterImage = require('../../assets/images/about.png');
 
 module.exports = React.createClass({
+	getInitialState: function(){
+		return{
+			aboutImage: {}
+		}
+	},
+	componentWillMount: function(){
+		InteractionManager.runAfterInteractions(() =>{
+			this.setState({
+				aboutImage: require('../../assets/images/about.png')
+			})
+		});
+	},
 	render: function(){
 		return(
     		<View style={styles.container}>
@@ -36,7 +48,7 @@ module.exports = React.createClass({
     			</ScrollView>
 				<View style={styles.wrapper}>
 					<View style={styles.footer}>
-						<Image source={FooterImage} style={styles.canvas} />
+						<Image source={this.state.aboutImage} style={styles.canvas} />
 					</View>
 				</View>    			
 			</View>

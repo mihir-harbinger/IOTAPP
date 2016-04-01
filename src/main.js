@@ -23,6 +23,8 @@ var Home = require('./views/home');
 var NewBooking = require('./views/newbooking');
 var Success = require('./views/success');
 var About = require('./views/about');
+var ReservationList = require('./views/reservationlist');
+var MeetingDetails = require('./views/meetingdetails');
 
 //Registering top level views
 var ROUTES = {
@@ -32,7 +34,9 @@ var ROUTES = {
 	home: Home,
 	newbooking: NewBooking,
 	success: Success,
-	about: About
+	about: About,
+	reservationlist: ReservationList,
+	meetingdetails: MeetingDetails
 };
 
 var _navigator, _route;

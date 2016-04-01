@@ -6,6 +6,7 @@ var {
   	PullToRefreshViewAndroid,
   	DrawerLayoutAndroid,
   	TouchableHighlight,
+  	InteractionManager,
   	ScrollView,
   	StyleSheet,
   	TextInput,
@@ -26,9 +27,6 @@ var ReloadView = require('../components/reloadview');
 var Icon = require('react-native-vector-icons/MaterialIcons');
 var Room = require('../components/room');
 
-//get assets
-var OfficeImage = require('../../assets/images/office.png');
-
 module.exports = React.createClass({
 
 	getInitialState: function(){
@@ -38,13 +36,19 @@ module.exports = React.createClass({
           		rowHasChanged: (row1, row2) => row1 !== row2
         	}),
 			loaded: false,
-			isRefreshing: false,
-			isEnabled: true,
-			isReloadRequired: false
+			isReloadRequired: false,
+			officeImage: {},
+			navIcon: {}
 		}
 	},
-	componentDidMount: function(){
-		this.loadData();
+	componentWillMount: function(){
+		InteractionManager.runAfterInteractions(() =>{
+			this.loadData();
+			this.setState({
+				officeImage: require('../../assets/images/office.png'),
+				navIcon: require('../../assets/images/stack.png')
+			})
+		})
 	},
 	loadData: function(){
 		
@@ -65,7 +69,7 @@ module.exports = React.createClass({
 	API: function(){
 
 		var _this = this;
-		this.setState({ rawData: [], isRefreshing: true, isEnabled: false, isReloadRequired: false, loaded: false });
+		this.setState({ rawData: [], isReloadRequired: false, loaded: false });
 
 		Parse.Cloud.run('fetchListOfRooms', {}).then(
 
@@ -79,19 +83,15 @@ module.exports = React.createClass({
 
 				console.log("[HOME API] Success: ", cleanData);
 
-				if(_this.isMounted()){
-					_this.setState({ 
-						rawData: _this.state.rawData.concat(cleanData),
-						dataSource: _this.state.dataSource.cloneWithRows(cleanData),
-						isRefreshing: false,
-						loaded: true,
-						isReloadRequired: false,
-						isEnabled: true
-					});					
-				}
+				_this.setState({ 
+					rawData: _this.state.rawData.concat(cleanData),
+					dataSource: _this.state.dataSource.cloneWithRows(cleanData),
+					loaded: true,
+					isReloadRequired: false,
+				});
 			},
 			function(error){
-				_this.setState({ isRefreshing: false, isEnabled: true, isReloadRequired: true, loaded: false })
+				_this.setState({ isReloadRequired: true, loaded: false })
 				console.log("[HOME API] Error: "+ JSON.stringify(error, null, 2));
 			}
 		);
@@ -100,7 +100,7 @@ module.exports = React.createClass({
 		if(this.state.isReloadRequired){
 			return this.renderReloadView();
 		}
-		if(this.state.loaded === false && this.state.isReloadRequired === false){
+		if(!this.state.loaded){
 			return this.renderLoadingView();
 		}
 
@@ -113,7 +113,7 @@ module.exports = React.createClass({
       		>
         		<View style={styles.container}>
 	          		<ToolbarAfterLoad
-	          			navIcon={require('../../assets/images/stack.png')}
+	          			navIcon={this.state.navIcon}
     	        		title={'Home'}
         	    		navigator={this.props.navigator}
             			sidebarRef={this}
@@ -124,7 +124,7 @@ module.exports = React.createClass({
             				<View style={{flex: 1, backgroundColor: '#ffffff'}} elevation={1}>
 	            				<View style={styles.quickBooking}>
 	            					<Image 
-	            						source={OfficeImage} 
+	            						source={this.state.officeImage} 
 	            						style={styles.canvas}
 	            					>
 	            					</Image>
@@ -135,14 +135,16 @@ module.exports = React.createClass({
 	            				</View>
 	            			</View>
         				</TouchableNativeFeedback>
-        				<View style={styles.roomListTitle}>
-        					<Text style={styles.hint}>IOT POWERED ROOMS</Text>
-        				</View>
-          				<ListView 
-            				dataSource={this.state.dataSource}
-                			renderRow={this.renderRoom}
-                			style={styles.listView}
-                		/>
+        				<View style={{flex: 1, backgroundColor: '#ffffff', marginTop: 10}}>
+	        				<View style={styles.roomListTitle}>
+	        					<Text style={styles.hint}>IOT POWERED ROOMS</Text>
+	        				</View>
+	          				<ListView 
+	            				dataSource={this.state.dataSource}
+	                			renderRow={this.renderRoom}
+	                			style={styles.listView}
+	                		/>
+                		</View>
         			</ScrollView>
       			</View>
       		</DrawerLayoutAndroid>
@@ -161,16 +163,39 @@ module.exports = React.createClass({
 	},
 	renderNavigationView: function(){
 	    return(
-			<View style={[styles.container, {backgroundColor: '#3d4955'}]}>
+			<View style={[styles.container, {backgroundColor: '#ffffff'}]}>
 				<View style={styles.sidebarHeader}>
-					
+					<Image source={require('../../assets/images/backdrop.png')} style={styles.canvas} />
 				</View>
-				<View style={styles.sidebarBody}></View>
+				<View style={styles.sidebarBody}>
+					<TouchableHighlight underlayColor={'#f5f5f5'} onPress={this.onPressReservationList}>
+						<View style={styles.sidebarItem}>
+							<Icon name="list" size={26} color="#999999" />
+							<Text style={styles.sidebarItemtext}>Reservation List</Text>
+						</View>
+					</TouchableHighlight>
+					<TouchableHighlight underlayColor={'#f5f5f5'}>
+						<View style={styles.sidebarItem}>
+							<Icon name="error-outline" size={26} color="#999999" />
+							<Text style={styles.sidebarItemtext}>Important Meetings</Text>
+						</View>
+					</TouchableHighlight>
+					<TouchableHighlight underlayColor={'#f5f5f5'}>
+						<View style={styles.sidebarItem}>
+							<Icon name="settings" size={26} color="#999999" />
+							<Text style={styles.sidebarItemtext}>Configuration</Text>
+						</View>
+					</TouchableHighlight>
+				</View>
 			</View>
 	    );
 	},
 	onPressNewBooking: function(){
 		this.props.navigator.push({ name: 'newbooking', data: this.state.rawData })
+	},
+	onPressReservationList: function(){
+		this.refs['DRAWER'].closeDrawer();
+		this.props.navigator.push({ name: 'reservationlist' })	
 	}
 });
 
@@ -238,8 +263,6 @@ const styles = StyleSheet.create({
 		right: 0
 	},
 	roomListTitle: { 
-		backgroundColor: '#ffffff', 
-		marginTop: 10, 
 		padding: 15, 
 		borderBottomColor: '#e8e8e8', 
 		borderBottomWidth: 1
@@ -250,5 +273,14 @@ const styles = StyleSheet.create({
 	},
 	sidebarBody: {
 		flex: 3
+	},
+	sidebarItem: {
+		margin: 15,
+		flexDirection: 'row'
+	},
+	sidebarItemtext: {
+		fontSize: 17,
+		marginLeft: 20,
+		color: '#888888'
 	}
 });

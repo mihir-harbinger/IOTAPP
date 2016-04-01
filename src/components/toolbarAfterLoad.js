@@ -23,7 +23,9 @@ module.exports = React.createClass({
 	},
 	_onActionSelected: function(position){
 		switch(position){
-			case 0: this.props.navigator.push({name: 'about'});
+			case 0: if(this.props.title!=="About"){
+						this.props.navigator.push({name: 'about'});
+					}
 					break;
 			case 2: this.props.navigator.immediatelyResetRouteStack([{name: 'signin'}]);			
 					break;

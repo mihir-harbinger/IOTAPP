@@ -1,3 +1,4 @@
+'use strict';
 var React = require('react-native');
 
 var {
@@ -28,12 +29,13 @@ var LoadingView = require('../components/loadingview');
 var ReloadView = require('../components/reloadview');
 var Icon = require('react-native-vector-icons/MaterialIcons');
 var Room = require('../components/room');
+var LoaderImage = require('../../assets/images/rolling.gif');
+var BlankImage = require('../../assets/images/1x1.png')
 
 module.exports = React.createClass({
 	getInitialState: function(){
 		return{
 			rawData: [],
-			loaded: false,
 			isReloadRequired: false,
 			title: '',
 			description: '',
@@ -44,22 +46,19 @@ module.exports = React.createClass({
 			errorTitle: '',
 			errorDescription: '',
 			disableSubmit: false,
-			buttonColor: '#0288D1'
+			buttonColor: '#0288D1',
+			loader: BlankImage
 		}
 	},
-	componentDidMount: function(){
+	componentWillMount: function(){
 		InteractionManager.runAfterInteractions(() => {  
 			this.setState({
 				rawData: this.props.data,
-				loaded: true
-			})    
+				selectedIndex: this.props.data[0].room_mac_id
+			});
 		});
 	},
 	render: function(){
-		if(!this.state.loaded){
-			return this.renderLoadingView();
-		}
-
 		return(
     		<View style={styles.container}>
           		<ToolbarAfterLoad
@@ -171,10 +170,11 @@ module.exports = React.createClass({
     						<TouchableHighlight 
     							underlayColor={'#f5f5f5'} 
     							style={styles.buttonTouchable}
-    							onPress={this.onPressBook}
+    							onPress={this.onPressCheckAvailability}
     						>
-    							<Text style={[styles.button, {color: this.state.buttonColor}]}>BOOK NOW</Text>
+    							<Text style={[styles.button, {color: this.state.buttonColor}]}>CHECK AVAILABILITY</Text>
     						</TouchableHighlight>
+    						<Image source={this.state.loader} style={styles.loaderImage} />
     					</View>
     				</View>
     			</ScrollView>
@@ -240,7 +240,7 @@ module.exports = React.createClass({
             ]
 		)
 	},
-	onPressBook: function(){
+	onPressCheckAvailability: function(){
 
 		if(this.state.disableSubmit){
 			return;
@@ -256,6 +256,7 @@ module.exports = React.createClass({
 		}
 
 		var _this = this;
+		this.setState({ disableSubmit: true, buttonColor: '#939393', loader: LoaderImage });
 
 		var _bookFromTime = parseFloat(Moment(this.state.selectedInTime, "H:m").subtract(Moment().utcOffset(), "minutes").format("H.mm"));
 		var _bookToTime = parseFloat(Moment(this.state.selectedOutTime, "H:m").subtract(Moment().utcOffset(), "minutes").format("H.mm"));
@@ -265,8 +266,7 @@ module.exports = React.createClass({
 		var _title = this.state.title;
 		var _description = this.state.description;
 		var _statusId = 1;
-
-		//this.setState({ disableSubmit: true, buttonColor: '#939393' });
+		var flag=false;
 
 		Parse.Cloud.run('searchRoomListForAvailableTime', {
 			bookfromtime: _bookFromTime,
@@ -274,8 +274,7 @@ module.exports = React.createClass({
 			bookdate: _bookDate
 		}).then(
 			function(result){
-
-				var i, j, roomList=[], roomStr='', flag=false, base = "Perhaps, try changing the room? ";
+				var i, roomList=[], roomStr='', messageString, messageTitle;
 				
 				for(i=0;i<result.length;i++){
 					if(result[i].room_mac_id===_roomMacId){
@@ -285,45 +284,53 @@ module.exports = React.createClass({
 						roomList.push(result[i].room_name);
 					}
 				}
-				
 				if(!flag){
-					roomStr = roomList.join(",");
-					roomStr = roomList.length > 1 ? base+roomStr+" are available." : base+roomStr+" is available.";
+					roomStr = roomList.join(", ");
+					if(roomList.length<1){
+						messageTitle = "No room available"
+						messageString = "Perhaps, try another time slot?"
+					}
+					else{
+						messageTitle = "Room available"
+						messageString="Perhaps, try another room? " + (roomList.length > 1 ? roomStr+" are available " : roomStr+" is available ") + "in the same time slot.";
+					}
+
 					Alert.alert(
-						"Room Unavailable",
-						roomStr,
+						messageTitle,
+						messageString,
 			            [
-			              	{text: 'OK', onPress: () => console.log('OK Pressed!')}
+			              	{text: 'OK', onPress: () => _this.setState({ disableSubmit: false, buttonColor: '#0288D1', loader: BlankImage })}
 			            ]
 					)
+				}
+				else{
+					Parse.Cloud.run('bookRoomFromAppCloudFunction', {
+						book_fromtime: _bookFromTime,
+						book_totime: _bookToTime,
+						book_date: _bookDate,
+						room_mac_id: _roomMacId,
+						user_id: _userId,
+						title: _title,
+						description: _description,
+						status_id: _statusId
+					}).then(
+						function(result){
+							_this.props.navigator.replace({name: 'success', data: { date: Moment(_bookDate, "D-M-YYYY").format("MMMM Do YYYY"),}});
+							console.log("[NEW BOOKING API] Success: "+ JSON.stringify(result, null, 2));
+						},
+						function(error){
+							_this.setState({ disableSubmit: false, buttonColor: '#0288D1', loader: BlankImage });
+							console.log("[NEW BOOKING API] Error: "+ JSON.stringify(error, null, 2));
+						}
+					);					
 				}
 				console.log("[NEW BOOKING API] Success: "+ JSON.stringify(result, null, 2));
 			},
 			function(error){
-				//this.setState({ disableSubmit: false, buttonColor: '#0288D1' });
+				flag=false;
+				_this.setState({ disableSubmit: false, buttonColor: '#0288D1', loader: BlankImage });
 				console.log("[NEW BOOKING API] Error: "+ JSON.stringify(error, null, 2));
 			}			
-		);
-		return;
-
-		Parse.Cloud.run('bookRoomFromAppCloudFunction', {
-			book_fromtime: _bookFromTime,
-			book_totime: _bookToTime,
-			book_date: _bookDate,
-			room_mac_id: _roomMacId,
-			user_id: _userId,
-			title: _title,
-			description: _description,
-			status_id: _statusId
-		}).then(
-			function(result){
-				_this.props.navigator.replace({name: 'success', data: { date: Moment(_bookDate, "D-M-YYYY").format("MMMM Do YYYY"),}});
-				console.log("[NEW BOOKING API] Success: "+ JSON.stringify(result, null, 2));
-			},
-			function(error){
-				this.setState({ disableSubmit: false, buttonColor: '#0288D1' });
-				console.log("[NEW BOOKING API] Error: "+ JSON.stringify(error, null, 2));
-			}
 		);
 	},
 	onPressHelp: function(){
@@ -431,5 +438,10 @@ const styles = StyleSheet.create({
 		color: '#ef5350',
 		fontSize: 12,
 		marginLeft: 3,
+	},
+	loaderImage: {
+		width: 13, 
+		height: 13, 
+		marginTop: 9
 	}
 })
