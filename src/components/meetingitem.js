@@ -33,7 +33,7 @@ module.exports = React.createClass({
 					</View>
 					<View style={styles.titleWrapper}>
 						<Text style={styles.title}>{this.props.item.title}</Text>
-						<Text style={styles.timestamp}>{titleCase(Moment(this.props.item.book_date, "D-M-YYYY").from(Moment()))}</Text>
+						<Text style={styles.timestamp}>{Moment(this.props.item.book_date, "D-M-YYYY").format("MMMM Do YYYY")}</Text>
 					</View>
 				</View>
 			</TouchableHighlight>
@@ -69,14 +69,14 @@ const styles = StyleSheet.create({
 		flex: 4
 	},
 	circle: {
-		width: 50,
-		height: 50,
-		borderRadius: 25,
+		width: 45,
+		height: 45,
+		borderRadius: 22.5,
 		alignItems: 'center',
 		justifyContent: 'center',
 	},
 	alphabet: {
-		fontSize: 20,
+		fontSize: 22,
 		color: '#ffffff'
 	}
-})
+});

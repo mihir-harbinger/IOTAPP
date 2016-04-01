@@ -7,6 +7,10 @@ var {
 	Text
 } = React;
 
+//get libraries
+var Moment = require('moment');
+
+//get components
 var ToolbarAfterLoad = require('../components/toolbarAfterLoad');
 
 module.exports = React.createClass({
@@ -15,21 +19,75 @@ module.exports = React.createClass({
     		<View style={styles.container}>
           		<ToolbarAfterLoad
           			navIcon={require('../../assets/images/arrow_back.png')}
-	        		title={this.props.data.title}
+	        		title={'Meeting'}
     	    		navigator={this.props.navigator}
         			sidebarRef={this}
         			isChildView={true}
       			/>
     			<ScrollView style={styles.body}>
     				<View style={styles.body}>
-    					<Text style={styles.title}>{this.props.data.title}</Text>
-    					<Text>{JSON.stringify(this.props.data, null, 2)}</Text>
+    					<View>
+	    					<Text style={styles.title}>{this.props.data.title}</Text>
+	    					<Text style={styles.description}>{this.props.data.description}</Text>
+    					</View>
+    					<View>
+    						<View style={styles.detailWrapper}>
+    							<View style={styles.heading}>
+    								<Text style={styles.bold}>Room Name</Text>
+    							</View>
+    							<View style={styles.info}>
+    								<Text>{this.props.data.room_name}</Text>
+    							</View>
+    						</View>    					
+    						<View style={styles.detailWrapper}>
+    							<View style={styles.heading}>
+    								<Text style={styles.bold}>Booking Date</Text>
+    							</View>
+    							<View style={styles.info}>
+    								<Text>{Moment(this.props.data.book_date, "D-M-YYYY").format("MMMM Do YYYY")}</Text>
+    							</View>
+    						</View>
+    						<View style={styles.detailWrapper}>
+    							<View style={styles.heading}>
+    								<Text style={styles.bold}>In Time</Text>
+    							</View>
+    							<View style={styles.info}>
+    								<Text>{Moment(this.props.data.book_fromtime, "H.m").add(Moment().utcOffset(), "minutes").format("H:mm")}</Text>
+    							</View>
+    						</View>
+    						<View style={styles.detailWrapper}>
+    							<View style={styles.heading}>
+    								<Text style={styles.bold}>Out Time</Text>
+    							</View>
+    							<View style={styles.info}>
+    								<Text>{Moment(this.props.data.book_totime, "H.m").add(Moment().utcOffset(), "minutes").format("H:mm")}</Text>
+    							</View>
+    						</View>
+    						<View style={styles.detailWrapper}>
+    							<View style={styles.heading}>
+    								<Text style={styles.bold}>Status</Text>
+    							</View>
+    							<View style={styles.info}>
+    								<Text>{statusToString(this.props.data.status_id)}</Text>
+    							</View>
+    						</View>    						
+    					</View>
     				</View>
     			</ScrollView>
   			</View>
   		);
 	}
 });
+
+function statusToString(id){
+	switch(id){
+		case 1: return "Booked";
+		case 2: return "Ongoing";
+		case 4: return "Cancelled";
+		case 5: return "Completed";	
+		default:return "Unknown";
+	}
+}
 
 const styles = StyleSheet.create({
 	container: {
@@ -40,4 +98,28 @@ const styles = StyleSheet.create({
 		padding: 10,
 		backgroundColor: '#ffffff'
 	},	
-})
+	title: {
+		fontSize: 22,
+		fontWeight: 'bold'
+	},
+	description: {
+		marginTop: 2,
+		color: '#939393'
+	},
+	detailWrapper: {
+		borderBottomWidth: 1,
+		borderBottomColor: '#f5f5f5',
+		flexDirection: 'row',
+		paddingTop: 10,
+		paddingBottom: 10
+	},
+	heading: {
+		flex: 1
+	},
+	info: {
+		flex: 2
+	},
+	bold: {
+		fontWeight: 'bold'
+	}
+});

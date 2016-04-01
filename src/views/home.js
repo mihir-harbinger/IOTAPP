@@ -9,6 +9,7 @@ var {
   	InteractionManager,
   	ScrollView,
   	StyleSheet,
+  	Dimensions,
   	TextInput,
   	ListView,
   	Platform,
@@ -26,6 +27,9 @@ var LoadingView = require('../components/loadingview');
 var ReloadView = require('../components/reloadview');
 var Icon = require('react-native-vector-icons/MaterialIcons');
 var Room = require('../components/room');
+
+//get dimensions
+const {height, width} = Dimensions.get('window');
 
 module.exports = React.createClass({
 
@@ -106,7 +110,7 @@ module.exports = React.createClass({
 
 		return(
       		<DrawerLayoutAndroid
-        		drawerWidth={300}
+        		drawerWidth={width-60}
         		drawerPosition={DrawerLayoutAndroid.positions.Left}
         		renderNavigationView={this.renderNavigationView}
         		ref={'DRAWER'}
@@ -272,7 +276,7 @@ const styles = StyleSheet.create({
 		backgroundColor: '#ffffff'
 	},
 	sidebarBody: {
-		flex: 3
+		flex: 2
 	},
 	sidebarItem: {
 		margin: 15,

@@ -444,4 +444,4 @@ const styles = StyleSheet.create({
 		height: 13, 
 		marginTop: 9
 	}
-})
+});

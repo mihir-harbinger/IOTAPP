@@ -129,4 +129,4 @@ const styles = StyleSheet.create({
 	listView:{
 		flex: 1
 	},
-})
+});

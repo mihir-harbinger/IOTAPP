@@ -41,4 +41,4 @@ const styles = StyleSheet.create({
 		width: 400,
 		height: 300
 	}
-})
+});
