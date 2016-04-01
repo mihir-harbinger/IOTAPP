@@ -1,9 +1,9 @@
 const data = [
-	{in: 1.3, out: 2},
-	{in: 3, out: 4},
-	{in: 15.3, out: 16},
-	{in: 16, out: 16.3},
-	{in: 17, out: 18}
+	{in: 1.3, out: 2, room: 'c'},
+	{in: 3, out: 4, room: 's'},
+	{in: 15.3, out: 16, room: 's'},
+	{in: 16, out: 16.3, room: 'c'},
+	{in: 17, out: 18, room: 'c'}
 ];
 
 function getMap(intervals){
@@ -15,19 +15,23 @@ function getMap(intervals){
 	return map;
 }
 
-module.exports = function(){
-	var i, j, _in, _out, flag=true;
+function isAvailable(sampleIN, sampleOUT, room){
+	var i, j, _in, _out, flag=true, local=[];
 	var map = getMap(48);
-	var sampleIN=3, sampleOUT=4;
 
-	// console.log(JSON.stringify(map, null, 2));
-	// return;
-	
 	for(i=0;i<data.length;i++){
-		_in = Math.ceil(data[i].in * 2);
-		_out = Math.ceil(data[i].out * 2) - 1;
+		if(data[i].room===room){
+			local.push(data[i]);
+		}
+	}
 
-		//console.log(_in, _out);
+	if(local.length<1){
+		return true;
+	}
+
+	for(i=0;i<local.length;i++){
+		_in = Math.ceil(local[i].in * 2);
+		_out = Math.ceil(local[i].out * 2) - 1;
 
 		for(j=_in;j<=_out;j++){
 			map[j].flag = false;
@@ -43,7 +47,17 @@ module.exports = function(){
 			break;
 		}
 	}
+	return flag;
+}
 
-	console.log(flag);
-	
+module.exports = function(){
+	var i, keys = [];
+	for(i=0;i<data.length;i++){
+		if(keys.indexOf(data[i].room) === -1){
+        	keys.push(data[i].room);        
+    	} 
+	}
+	for(i=0;i<keys.length;i++){
+		console.log(keys[i], isAvailable(17, 18, keys[i]));
+	}
 }();

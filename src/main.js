@@ -51,7 +51,7 @@ module.exports = React.createClass({
         	//Render first view through initialRoute
 			<Navigator 
 				style={styles.container} 
-				initialRoute={{ name: 'home', index: 0 }} 
+				initialRoute={{ name: 'splash', index: 0 }} 
 				renderScene={ this.renderScene } 
 				configureScene={ () => { return Navigator.SceneConfigs.PushFromRight; }}
 			>
