@@ -2,11 +2,12 @@
 var React = require('react-native');
 
 var {
-	TouchableNativeFeedback,
   	PullToRefreshViewAndroid,
   	DrawerLayoutAndroid,
   	TouchableHighlight,
   	InteractionManager,
+  	TimePickerAndroid,
+  	DatePickerAndroid,
   	ScrollView,
   	StyleSheet,
   	Dimensions,
@@ -20,6 +21,7 @@ var {
 
 //get libraries
 var Parse = require('parse/react-native').Parse;
+var Moment = require('moment');
 
 //get components
 var ToolbarAfterLoad = require('../components/toolbarAfterLoad');
@@ -39,20 +41,15 @@ module.exports = React.createClass({
 			dataSource: new ListView.DataSource({
           		rowHasChanged: (row1, row2) => row1 !== row2
         	}),
-			loaded: false,
+			loaded: true,
 			isReloadRequired: false,
-			officeImage: {},
-			navIcon: {}
+			selectedDate: Moment(),
+			selectedInTime: roundToNextSlot(Moment()),
+			selectedOutTime: roundToNextSlot(Moment()).add(30, "minutes")
 		}
 	},
 	componentWillMount: function(){
-		InteractionManager.runAfterInteractions(() =>{
-			this.loadData();
-			this.setState({
-				officeImage: require('../../assets/images/office.png'),
-				navIcon: require('../../assets/images/stack.png')
-			})
-		})
+
 	},
 	loadData: function(){
 		
@@ -117,39 +114,72 @@ module.exports = React.createClass({
       		>
         		<View style={styles.container}>
 	          		<ToolbarAfterLoad
-	          			navIcon={this.state.navIcon}
+	          			navIcon={require('../../assets/images/stack.png')}
     	        		title={'Home'}
         	    		navigator={this.props.navigator}
             			sidebarRef={this}
             			isChildView={false}
           			/>
-        			<ScrollView style={styles.body}>
-        				<TouchableNativeFeedback onPress={this.onPressNewBooking}>
-            				<View style={{flex: 1, backgroundColor: '#ffffff'}} elevation={1}>
-	            				<View style={styles.quickBooking}>
-	            					<Image 
-	            						source={this.state.officeImage} 
-	            						style={styles.canvas}
-	            					>
-	            					</Image>
-	            				</View>
-	            				<View style={styles.wrapper}>
-		        						<Text style={styles.hint}>BOOK ON THE GO</Text>
-		        						<Text style={{marginTop: 5}}>Hi there! Tap on this card to reserve a conference room now. Alternatively, you can go through the list beneath to see available slots.</Text>
-	            				</View>
-	            			</View>
-        				</TouchableNativeFeedback>
-        				<View style={{flex: 1, backgroundColor: '#ffffff', marginTop: 10}}>
-	        				<View style={styles.roomListTitle}>
-	        					<Text style={styles.hint}>IOT POWERED ROOMS</Text>
+					<PullToRefreshViewAndroid 
+                		style={styles.container}
+                		refeshing={this.state.isRefreshing}
+                		onRefresh={this.reloadData}
+                		enabled={this.state.isEnabled}
+              		>
+	        			<ScrollView style={styles.body}>
+	        				<View style={styles.panel} elevation={3}>
+	        					<View style={styles.leftSection}>
+	        						<TouchableHighlight 
+	        							onPress={this.onPressChangeDate.bind(this, { date: new Date(this.state.selectedDate.format("YYYY-MM-DD")), minDate: new Date() })}
+	        							underlayColor={'#3f9cc5'}
+	        						>
+		        						<View style={styles.dateWrapper}>
+		        							<View style={styles.date}>
+		        								<Text style={styles.dateNumber}>
+		        									{this.state.selectedDate.format("D")}
+		        								</Text>
+		        							</View>
+		        							<View style={styles.stackItems}>
+				        						<Text style={styles.dayText}>
+				        							{this.state.selectedDate.format("dddd")}
+				        						</Text>
+				        						<Text style={styles.monthYearText}>
+				        							{this.state.selectedDate.format("MMM YYYY")}
+				        						</Text>        							
+		        							</View>
+		        						</View>
+	        						</TouchableHighlight>
+	        					</View>
+	        					<View style={styles.rightSection}>
+	        						<View style={[styles.stackItems, {padding: 10}]}>
+		        						<Text style={styles.dayText}>In-Out Time</Text>
+		        						<View style={styles.inOutTimeWrapper}>
+		        							<TouchableHighlight 
+		        								onPress={this.onPressChangeInOutTime.bind(this, "IN", {hour: this._parseHour(this.state.selectedInTime), minute: this._parseMinute(this.state.selectedInTime)})}
+		        								underlayColor={'#3f9cc5'}
+		        							>
+		        								<Text style={styles.monthYearText}>
+		        									{this.state.selectedInTime.format("HH:mm")}
+		        								</Text>
+		        							</TouchableHighlight>
+		        							<Text style={styles.monthYearText}> - </Text>
+		        							<TouchableHighlight 
+		        								onPress={this.onPressChangeInOutTime.bind(this, "OUT", {hour: this._parseHour(this.state.selectedInTime), minute: this._parseMinute(this.state.selectedInTime)})}
+		        								underlayColor={'#3f9cc5'}
+		        							>
+		        								<Text style={styles.monthYearText}>
+		        									{this.state.selectedOutTime.format("HH:mm")}
+		        								</Text>
+											</TouchableHighlight>
+		        						</View>
+		        					</View>
+	        					</View>
 	        				</View>
-	          				<ListView 
-	            				dataSource={this.state.dataSource}
-	                			renderRow={this.renderRoom}
-	                			style={styles.listView}
-	                		/>
-                		</View>
-        			</ScrollView>
+	        				<View style={styles.content}>
+	        					<Text>hi</Text>
+	        				</View>
+	        			</ScrollView>
+	        		</PullToRefreshViewAndroid>	
       			</View>
       		</DrawerLayoutAndroid>
     	);
@@ -194,14 +224,69 @@ module.exports = React.createClass({
 			</View>
 	    );
 	},
-	onPressNewBooking: function(){
-		this.props.navigator.push({ name: 'newbooking', data: this.state.rawData })
+	onPressChangeDate: async function(options){
+		const {action, year, month, day} = await DatePickerAndroid.open(options);
+		if (action === DatePickerAndroid.dismissedAction) {
+			return;
+		}
+		var dateString = year + "-" + ((month+1)<10 ? "0"+(month+1) : month+1) + "-" + (day < 10 ? "0"+day : day);
+		var date = new Date(dateString);
+		this.setState({ selectedDate: Moment(date) });		
 	},
+	onPressChangeInOutTime: async function(mode, options){
+		var {action, minute, hour} = await TimePickerAndroid.open(options);
+
+		if(!(action === TimePickerAndroid.timeSetAction)){
+			return;
+		}
+
+		if(minute>0 && minute<30){
+			minute=30;
+		}
+		else if(minute>30){
+			
+			minute=0;
+			
+			if(hour===23){
+				hour=0;
+			}
+			else{
+				hour++;
+			}
+		}
+
+		switch(mode){
+			case "IN"	: 	if(Date.parse('01/01/2011 ' + Moment(hour + ":" + minute, "H:m").format("H:m:s")) > Date.parse('01/01/2011 ' + Moment(this.state.selectedOutTime).format("H:m:s"))){
+								break;
+							}
+							this.setState({ selectedInTime: Moment(hour + ":" + minute, "H:m") });
+							break;
+			case "OUT"	: 	if(Date.parse('01/01/2011 ' + Moment(this.state.selectedInTime).format("H:m:s")) > Date.parse('01/01/2011 ' + Moment(hour + ":" + minute, "H:m").format("H:m:s"))){
+								break;				
+							}
+							this.setState({ selectedOutTime: Moment(hour + ":" + minute, "H:m") });
+							break;
+		}		
+	},	
 	onPressReservationList: function(){
 		this.refs['DRAWER'].closeDrawer();
 		this.props.navigator.push({ name: 'reservationlist' })	
-	}
+	},
+	_parseHour: function(time){
+		time = time.format("H:m");
+		return parseInt(time.slice(0, time.indexOf(":")));
+	},
+	_parseMinute: function(time){
+		time = time.format("H:m");
+		return parseInt(time.substr(time.indexOf(":") + 1));
+	},	
 });
+
+function roundToNextSlot(start){
+	var ROUNDING = 30 * 60 * 1000; /*ms*/
+	start = Moment(Math.ceil((+start) / ROUNDING) * ROUNDING);
+	return start;
+}
 
 const styles = StyleSheet.create({
 	container: {
@@ -209,62 +294,24 @@ const styles = StyleSheet.create({
 	},
 	body: {
 		flex: 1,
-		backgroundColor: '#e8e8e8',
+		backgroundColor: '#ffffff',
+	},
+	content: {
+		flex: 1,
 		padding: 10
 	},
 	listView: {
 		flex: 1
 	},
-	touchable:{
-		marginBottom: 10,
-		borderRadius: 2
-	},
-	wrapper:{
-		padding: 15,
-		backgroundColor: '#ffffff',
-		borderBottomLeftRadius: 2,
-		borderBottomRightRadius: 2,
-	},
 	hint: {
 		fontSize: 15,
 		color: '#0288D1',
-	},
-	leftSection: {
-		flex: 2,
-	},
-	rightSection: {
-		flex: 1,
-		alignItems: 'flex-end',
-		justifyContent: 'center'
-	},
-	bookNowImage: {
-		width: 90,
-		height: 83
-	},
-	description: {
-		fontSize: 15,
-		color: '#a5a5a5'
-	},
-	location: {
-		fontSize: 15,
-		color: '#a5a5a5'
-	},
-	quickBooking: {
-		flex: 1,
-    	height: 150,
 	},
 	canvas: {
 		flex: 1,
 		alignSelf: 'stretch',
     	width: null,
     	position: 'relative'
-	},
-	overlay: {
-		position: 'absolute',
-		top: 0,
-		bottom: 0,
-		left: 0,
-		right: 0
 	},
 	roomListTitle: { 
 		padding: 15, 
@@ -286,5 +333,55 @@ const styles = StyleSheet.create({
 		fontSize: 17,
 		marginLeft: 20,
 		color: '#888888'
+	},
+	panel: {
+		padding: 10,
+		backgroundColor: '#4FC3F7',
+		flexDirection: 'row'
+	},
+	leftSection: {
+		flex: 1,
+		alignItems: 'center',
+		justifyContent: 'center',
+	},
+	dateWrapper: {
+		flexDirection: 'row',
+		padding: 10
+	},
+	dayText: {
+		fontSize: 15,
+		color: '#ffffff'
+	},
+	dateNumber: {
+		fontSize: 30,
+		color: '#4FC3F7'
+	},
+	stackItems: {
+		paddingLeft: 10,
+		marginTop: 2
+	},
+	monthYearText: {
+		fontSize: 20,
+		color: '#ffffff'
+	},
+	rightSection: {
+		flex: 1,
+		alignItems: 'center',
+		justifyContent: 'center'		
+	},
+	inOutTimeWrapper: {
+		flexDirection: 'row'
+	},
+	time: {
+		fontSize: 25,
+		color: '#ffffff'
+	},
+	date: {
+		width: 50,
+		height: 50,
+		borderRadius: 25,
+		alignItems: 'center',
+		justifyContent: 'center',
+		backgroundColor: '#ffffff',
 	}
 });

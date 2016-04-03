@@ -18,6 +18,7 @@ module.exports = React.createClass({
 	        		title={this.props.title}
 	        		navigator={this.props.navigator}
 	        		isChildView={false}
+	        		elevation={0}
 	  			/>			
 	  			<View style={styles.loadingScene}>
 					<Image source={require('../../assets/images/loader.gif')} style={styles.loader}></Image>
