@@ -1,25 +1,19 @@
 var React = require('react-native');
 
 var {
+	Dimensions,
 	StyleSheet,
 	Image,
 	View
 } = React;
 
-var ToolbarBeforeLoad = require('./toolbarBeforeLoad');
+const {height, width} = Dimensions.get('window');
 
 module.exports = React.createClass({
 
 	render: function(){
 		return(
 			<View style={styles.container}>
-	      		<ToolbarBeforeLoad
-	      			navIcon={this.props.navIcon}
-	        		title={this.props.title}
-	        		navigator={this.props.navigator}
-	        		isChildView={false}
-	        		elevation={0}
-	  			/>			
 	  			<View style={styles.loadingScene}>
 					<Image source={require('../../assets/images/loader.gif')} style={styles.loader}></Image>
 				</View>
@@ -30,16 +24,16 @@ module.exports = React.createClass({
 
 const styles = StyleSheet.create({
 	container: {
-		flex: 1
+		flex: 1,
 	},
 	loadingScene: {
 		flex: 1,
-		backgroundColor: '#fefefe',
+		backgroundColor: '#eeeeee',
 		alignItems: 'center',
 		justifyContent: 'center'
 	},
 	loader: {
-		width: 400,
-		height: 300
+		width: width,
+		height: width * (width/height)
 	}
 });

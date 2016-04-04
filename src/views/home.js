@@ -14,6 +14,7 @@ var {
   	TextInput,
   	ListView,
   	Platform,
+  	Alert,
   	Image,
   	Text,
   	View
@@ -49,7 +50,7 @@ module.exports = React.createClass({
 		}
 	},
 	componentWillMount: function(){
-
+		this.loadData();
 	},
 	loadData: function(){
 		
@@ -70,12 +71,21 @@ module.exports = React.createClass({
 	API: function(){
 
 		var _this = this;
+
+		var _bookFromTime = parseFloat(Moment(this.state.selectedInTime, "H:m").subtract(Moment().utcOffset(), "minutes").format("H.m"));
+		var _bookToTime = parseFloat(Moment(this.state.selectedOutTime, "H:m").subtract(Moment().utcOffset(), "minutes").format("H.m"));
+		var _bookDate = Moment(this.state.selectedDate).format("D-M-YYYY");
+
 		this.setState({ rawData: [], isReloadRequired: false, loaded: false });
 
-		Parse.Cloud.run('fetchListOfRooms', {}).then(
+		Parse.Cloud.run('checkAvailibilityOfRooms', {
+			bookdate: _bookDate,
+			bookfromtime: _bookFromTime,
+			booktotime: _bookToTime
+		}).then(
 
 			function(result){
-
+				
 				//Convert ParseObject to JSON; then push into an array.
 				var cleanData = [];
 				for(var i=0;i<result.length;i++){
@@ -98,12 +108,12 @@ module.exports = React.createClass({
 		);
 	},
 	render: function(){
-		if(this.state.isReloadRequired){
-			return this.renderReloadView();
-		}
-		if(!this.state.loaded){
-			return this.renderLoadingView();
-		}
+		// if(this.state.isReloadRequired){
+		// 	return this.renderReloadView();
+		// }
+		// if(!this.state.loaded){
+		// 	return this.renderLoadingView();
+		// }
 
 		return(
       		<DrawerLayoutAndroid
@@ -152,7 +162,15 @@ module.exports = React.createClass({
 	        					</View>
 	        					<View style={styles.rightSection}>
 	        						<View style={[styles.stackItems, {padding: 10}]}>
-		        						<Text style={styles.dayText}>In-Out Time</Text>
+	        							<View style={{flexDirection: 'row'}}>
+    										<Text style={styles.dayText}>In-Out Time </Text>
+    										<TouchableHighlight 
+    											onPress={this.onPressHelp}
+    											underlayColor={'#3f9cc5'}
+    										>
+    											<Text style={styles.helpText}>[?]</Text>
+    										</TouchableHighlight>
+    									</View>
 		        						<View style={styles.inOutTimeWrapper}>
 		        							<TouchableHighlight 
 		        								onPress={this.onPressChangeInOutTime.bind(this, "IN", {hour: this._parseHour(this.state.selectedInTime), minute: this._parseMinute(this.state.selectedInTime)})}
@@ -175,8 +193,8 @@ module.exports = React.createClass({
 		        					</View>
 	        					</View>
 	        				</View>
-	        				<View style={styles.content}>
-	        					<Text>hi</Text>
+	        				<View style={styles.container}>
+	        					<View>{ this.state.loaded ? this.renderListView() : this.renderLoadingView() }</View>
 	        				</View>
 	        			</ScrollView>
 	        		</PullToRefreshViewAndroid>	
@@ -185,15 +203,36 @@ module.exports = React.createClass({
     	);
 	},
 	renderLoadingView: function(){
-		return <LoadingView title={'Home'} navigator={this.props.navigator}  navIcon={require('../../assets/images/stack.png')} />
+		return <LoadingView />
 	},
 	renderReloadView: function(){
-		return <ReloadView title={'Home'} navigator={this.props.navigator} loadData={this.loadData} />
+		return <ReloadView loadData={this.loadData} />
+	},
+	renderListView: function(){
+		if(this.state.rawData.length){
+			return(
+				<View>
+				<Text style={styles.listViewTitle}>Available Rooms</Text>
+				<ListView 
+					dataSource={this.state.dataSource}
+					renderRow={this.renderRoom}
+					style={styles.listView}
+				/>	
+				</View>		
+			);			
+		}
+		return(
+			<Text>No data found</Text>
+		) 
+
 	},
 	renderRoom: function(room){
 		return(
 			<Room data={room} />
 		)
+	},
+	renderEmptyView: function(){
+		return <Text>hi</Text>
 	},
 	renderNavigationView: function(){
 	    return(
@@ -256,17 +295,30 @@ module.exports = React.createClass({
 		}
 
 		switch(mode){
-			case "IN"	: 	if(Date.parse('01/01/2011 ' + Moment(hour + ":" + minute, "H:m").format("H:m:s")) > Date.parse('01/01/2011 ' + Moment(this.state.selectedOutTime).format("H:m:s"))){
-								break;
-							}
-							this.setState({ selectedInTime: Moment(hour + ":" + minute, "H:m") });
-							break;
-			case "OUT"	: 	if(Date.parse('01/01/2011 ' + Moment(this.state.selectedInTime).format("H:m:s")) > Date.parse('01/01/2011 ' + Moment(hour + ":" + minute, "H:m").format("H:m:s"))){
-								break;				
-							}
-							this.setState({ selectedOutTime: Moment(hour + ":" + minute, "H:m") });
-							break;
+			case "IN":
+				// if((Date.parse('01/01/2011 ' + Moment(hour + ":" + minute, "H:m").format("H:m:s")) >= Date.parse('01/01/2011 ' + Moment(this.state.selectedOutTime).format("H:m:s"))) && Moment(this.state.selectedOutTime).format("H:m") !== "0:0"){
+				// 	break;
+				// }
+				this.setState({ selectedInTime: Moment(hour + ":" + minute, "H:m") });
+				break;
+
+			case "OUT":
+				// if((Date.parse('01/01/2011 ' + Moment(this.state.selectedInTime).format("H:m:s")) >= Date.parse('01/01/2011 ' + Moment(hour + ":" + minute, "H:m").format("H:m:s"))) && hour + ":" + minute !== "0:0"){
+				// 	break;				
+				// }
+				this.setState({ selectedOutTime: Moment(hour + ":" + minute, "H:m") });
+				break;
 		}		
+	},
+	onPressHelp: function(){
+		var _this = this;
+		Alert.alert(
+			"What's wrong with the time?",
+			"Your time is automatically adjusted to the nearest half-hour slot.",
+            [
+              	{text: 'OK', onPress: () => console.log('Cancel Pressed!')}
+            ]
+		);		
 	},	
 	onPressReservationList: function(){
 		this.refs['DRAWER'].closeDrawer();
@@ -279,7 +331,7 @@ module.exports = React.createClass({
 	_parseMinute: function(time){
 		time = time.format("H:m");
 		return parseInt(time.substr(time.indexOf(":") + 1));
-	},	
+	},
 });
 
 function roundToNextSlot(start){
@@ -296,12 +348,11 @@ const styles = StyleSheet.create({
 		flex: 1,
 		backgroundColor: '#ffffff',
 	},
-	content: {
-		flex: 1,
-		padding: 10
-	},
 	listView: {
 		flex: 1
+	},
+	listViewTitle: {
+		margin: 16
 	},
 	hint: {
 		fontSize: 15,
@@ -351,6 +402,11 @@ const styles = StyleSheet.create({
 	dayText: {
 		fontSize: 15,
 		color: '#ffffff'
+	},
+	helpText: {
+		fontSize: 12,
+		color: '#ffffff',
+		margin: 2
 	},
 	dateNumber: {
 		fontSize: 30,

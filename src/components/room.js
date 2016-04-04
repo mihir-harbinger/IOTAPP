@@ -37,4 +37,4 @@ const styles = StyleSheet.create({
 		fontSize: 22,
 		color: '#a7a7a7'
 	}
-})
+});
