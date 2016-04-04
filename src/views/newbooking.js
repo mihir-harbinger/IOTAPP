@@ -45,7 +45,7 @@ module.exports = React.createClass({
       			/>
     			<View style={styles.body} keyboardShouldPersistTaps={true}>
     				<View style={styles.panel} elevation={3}>
-    					<Text style={{color: '#ffffff'}}>Title</Text>
+    					<Text style={{color: '#ffffff'}}>Meeting Title</Text>
     					<TextInput
 							underlineColorAndroid={'#E1F5FE'} 
 							style={styles.inputTitle}
@@ -189,6 +189,7 @@ const styles = StyleSheet.create({
 		fontSize: 26,
 	},
 	input: {
+		color: '#ffffff',
 		padding: 4,
 		height: 45,
 		fontSize: 16,

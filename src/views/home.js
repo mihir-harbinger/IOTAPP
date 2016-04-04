@@ -206,26 +206,18 @@ module.exports = React.createClass({
 		return <ReloadView loadData={this.loadData} />
 	},
 	renderListView: function(){
-		if(this.state.loaded){
-			return(
-				<View style={styles.container}>
-					<View style={styles.listViewTitle}>
-						<Text style={{marginTop: 2}}>AVAILABLE ROOMS</Text>
-					</View>
-					<ListView 
-						dataSource={this.state.dataSource}
-						renderRow={this.renderRoom}
-						style={styles.listView}
-					/>	
-				</View>		
-			);			
-		}
 		return(
 			<View style={styles.container}>
-				<Text>No data found</Text>
-			</View>
-		) 
-
+				<View style={styles.listViewTitle}>
+					<Text style={{marginTop: 2}}>AVAILABLE ROOMS</Text>
+				</View>
+				<ListView 
+					dataSource={this.state.dataSource}
+					renderRow={this.renderRoom}
+					style={styles.listView}
+				/>	
+			</View>		
+		);
 	},
 	renderRoom: function(room){
 		return(
@@ -245,7 +237,7 @@ module.exports = React.createClass({
 					<TouchableHighlight underlayColor={'#f5f5f5'} onPress={this.onPressReservationList}>
 						<View style={styles.sidebarItem}>
 							<Icon name="list" size={26} color="#999999" />
-							<Text style={styles.sidebarItemtext}>Reservation List</Text>
+							<Text style={styles.sidebarItemtext}>My Reservations</Text>
 						</View>
 					</TouchableHighlight>
 					<TouchableHighlight underlayColor={'#f5f5f5'}>

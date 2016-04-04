@@ -81,13 +81,6 @@ module.exports = React.createClass({
 		);
 	},
 	render: function(){
-		if(this.state.isReloadRequired){
-			return this.renderReloadView();
-		}
-		if(!this.state.loaded){
-			return this.renderLoadingView();
-		}
-
 		return(
     		<View style={styles.container}>
           		<ToolbarAfterLoad
@@ -97,14 +90,19 @@ module.exports = React.createClass({
         			sidebarRef={this}
         			isChildView={true}
       			/>
-    			<ScrollView style={styles.body}>
-					<ListView 
-        				dataSource={this.state.dataSource}
-            			renderRow={this.renderReservation}
-            			style={styles.listView}
-            		/>
-    			</ScrollView>
+      			{this.state.loaded ? this.renderListView() : this.renderLoadingView()}
   			</View>
+		)
+	},
+	renderListView: function(){
+		return(
+			<ScrollView style={styles.body}>
+				<ListView 
+    				dataSource={this.state.dataSource}
+        			renderRow={this.renderReservation}
+        			style={styles.listView}
+        		/>
+			</ScrollView>
 		)
 	},
 	renderLoadingView: function(){
