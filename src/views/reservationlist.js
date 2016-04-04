@@ -108,10 +108,10 @@ module.exports = React.createClass({
 		)
 	},
 	renderLoadingView: function(){
-		return <LoadingView title={'Reservation List'} navigator={this.props.navigator} navIcon={require('../../assets/images/arrow_back.png')} isChildView={true} />
+		return <LoadingView />
 	},
 	renderReloadView: function(){
-		return <ReloadView title={'Reservation List'} navigator={this.props.navigator} loadData={this.loadData} />
+		return <ReloadView loadData={this.loadData} />
 	},
 	renderReservation: function(item){
 		return <MeetingItem item={item} navigator={this.props.navigator} />

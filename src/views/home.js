@@ -8,6 +8,7 @@ var {
   	InteractionManager,
   	TimePickerAndroid,
   	DatePickerAndroid,
+  	ToastAndroid,
   	ScrollView,
   	StyleSheet,
   	Dimensions,
@@ -136,7 +137,7 @@ module.exports = React.createClass({
                 		onRefresh={this.reloadData}
                 		enabled={this.state.isEnabled}
               		>
-	        			<ScrollView style={styles.body}>
+	        			<View style={styles.body}>
 	        				<View style={styles.panel} elevation={3}>
 	        					<View style={styles.leftSection}>
 	        						<TouchableHighlight 
@@ -182,7 +183,7 @@ module.exports = React.createClass({
 		        							</TouchableHighlight>
 		        							<Text style={styles.monthYearText}> - </Text>
 		        							<TouchableHighlight 
-		        								onPress={this.onPressChangeInOutTime.bind(this, "OUT", {hour: this._parseHour(this.state.selectedInTime), minute: this._parseMinute(this.state.selectedInTime)})}
+		        								onPress={this.onPressChangeInOutTime.bind(this, "OUT", {hour: this._parseHour(this.state.selectedOutTime), minute: this._parseMinute(this.state.selectedOutTime)})}
 		        								underlayColor={'#3f9cc5'}
 		        							>
 		        								<Text style={styles.monthYearText}>
@@ -193,10 +194,10 @@ module.exports = React.createClass({
 		        					</View>
 	        					</View>
 	        				</View>
-	        				<View style={styles.container}>
-	        					<View>{ this.state.loaded ? this.renderListView() : this.renderLoadingView() }</View>
+	        				<View style={styles.body}>
+	        					{ this.state.loaded ? this.renderListView() : this.renderLoadingView() }
 	        				</View>
-	        			</ScrollView>
+	        			</View>
 	        		</PullToRefreshViewAndroid>	
       			</View>
       		</DrawerLayoutAndroid>
@@ -209,26 +210,31 @@ module.exports = React.createClass({
 		return <ReloadView loadData={this.loadData} />
 	},
 	renderListView: function(){
-		if(this.state.rawData.length){
+		if(this.state.loaded){
 			return(
-				<View>
-				<Text style={styles.listViewTitle}>Available Rooms</Text>
-				<ListView 
-					dataSource={this.state.dataSource}
-					renderRow={this.renderRoom}
-					style={styles.listView}
-				/>	
+				<View style={styles.container}>
+					<View style={styles.listViewTitle}>
+						<Text style={{marginTop: 2}}>AVAILABLE ROOMS</Text>
+						<Text>{Moment(this.state.selectedInTime, "H:m").subtract(Moment().utcOffset(), "minutes").format("H.m") + " " + Moment(this.state.selectedOutTime, "H:m").subtract(Moment().utcOffset(), "minutes").format("H.m")}</Text>
+					</View>
+					<ListView 
+						dataSource={this.state.dataSource}
+						renderRow={this.renderRoom}
+						style={styles.listView}
+					/>	
 				</View>		
 			);			
 		}
 		return(
-			<Text>No data found</Text>
+			<View style={styles.container}>
+				<Text>No data found</Text>
+			</View>
 		) 
 
 	},
 	renderRoom: function(room){
 		return(
-			<Room data={room} />
+			<Room data={room} navigator={this.props.navigator} />
 		)
 	},
 	renderEmptyView: function(){
@@ -274,6 +280,7 @@ module.exports = React.createClass({
 	},
 	onPressChangeInOutTime: async function(mode, options){
 		var {action, minute, hour} = await TimePickerAndroid.open(options);
+		var isTimeAdjusted = false
 
 		if(!(action === TimePickerAndroid.timeSetAction)){
 			return;
@@ -281,6 +288,7 @@ module.exports = React.createClass({
 
 		if(minute>0 && minute<30){
 			minute=30;
+			isTimeAdjusted = true;
 		}
 		else if(minute>30){
 			
@@ -292,21 +300,34 @@ module.exports = React.createClass({
 			else{
 				hour++;
 			}
+			isTimeAdjusted = true;
 		}
 
 		switch(mode){
 			case "IN":
-				// if((Date.parse('01/01/2011 ' + Moment(hour + ":" + minute, "H:m").format("H:m:s")) >= Date.parse('01/01/2011 ' + Moment(this.state.selectedOutTime).format("H:m:s"))) && Moment(this.state.selectedOutTime).format("H:m") !== "0:0"){
-				// 	break;
-				// }
+				if(isTimeAdjusted){
+					ToastAndroid.show('Your in-time was adjusted to '+Moment(hour + ":" + minute, "H:m").format("H:mm"), ToastAndroid.LONG);
+				}
 				this.setState({ selectedInTime: Moment(hour + ":" + minute, "H:m") });
+				if((Date.parse('01/01/2011 ' + Moment(hour + ":" + minute, "H:m").format("H:m:s")) >= Date.parse('01/01/2011 ' + Moment(this.state.selectedOutTime).format("H:m:s"))) && Moment(this.state.selectedOutTime).format("H:m") !== "0:0"){
+					break;
+				}
+				else{
+					this.loadData();
+				}				
 				break;
 
 			case "OUT":
-				// if((Date.parse('01/01/2011 ' + Moment(this.state.selectedInTime).format("H:m:s")) >= Date.parse('01/01/2011 ' + Moment(hour + ":" + minute, "H:m").format("H:m:s"))) && hour + ":" + minute !== "0:0"){
-				// 	break;				
-				// }
+				if(isTimeAdjusted){
+					ToastAndroid.show('Your out-time was adjusted to '+Moment(hour + ":" + minute, "H:m").format("H:mm"), ToastAndroid.LONG);
+				}				
 				this.setState({ selectedOutTime: Moment(hour + ":" + minute, "H:m") });
+				if((Date.parse('01/01/2011 ' + Moment(this.state.selectedInTime).format("H:m:s")) >= Date.parse('01/01/2011 ' + Moment(hour + ":" + minute, "H:m").format("H:m:s"))) && hour + ":" + minute !== "0:0"){
+					break;				
+				}
+				else{
+					this.loadData();
+				}
 				break;
 		}		
 	},
@@ -352,7 +373,8 @@ const styles = StyleSheet.create({
 		flex: 1
 	},
 	listViewTitle: {
-		margin: 16
+		padding: 16,
+		backgroundColor: '#eeeeee'
 	},
 	hint: {
 		fontSize: 15,

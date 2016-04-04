@@ -3,16 +3,10 @@ var React = require('react-native');
 
 var {
 	TouchableNativeFeedback,
-	InteractionManager,
   	TouchableHighlight,
-  	TimePickerAndroid,
-  	DatePickerAndroid,
   	ScrollView,
   	StyleSheet,
   	TextInput,
-  	ListView,
-  	Platform,
-  	Picker,
   	Alert,
   	Image,
   	Text,
@@ -35,28 +29,14 @@ var BlankImage = require('../../assets/images/1x1.png')
 module.exports = React.createClass({
 	getInitialState: function(){
 		return{
-			rawData: [],
-			isReloadRequired: false,
 			title: '',
 			description: '',
-			selectedIndex: '',
-			selectedDate: new Date(),
-			selectedInTime: roundToNextSlot(Moment()).format("H:m"),
-			selectedOutTime: roundToNextSlot(Moment()).add(30, "minutes").format("H:m"),
 			errorTitle: '',
 			errorDescription: '',
 			disableSubmit: false,
 			buttonColor: '#0288D1',
 			loader: BlankImage
 		}
-	},
-	componentWillMount: function(){
-		InteractionManager.runAfterInteractions(() => {  
-			this.setState({
-				rawData: this.props.data,
-				selectedIndex: this.props.data[0].room_mac_id
-			});
-		});
 	},
 	render: function(){
 		return(
@@ -102,62 +82,6 @@ module.exports = React.createClass({
 	    						</View>
 	    					</View>
     					</View>
-    					<View style={styles.wizardStep}>
-	    					<Text style={styles.wizardStepText}>Conference Room</Text>
-	    					<View style={styles.wizardstepAction}>
-	    						<View style={{flex: 1}}>
-				    				<Picker 
-				    					mode={"dropdown"} 
-				    					selectedValue={this.state.selectedIndex}
-				    					onValueChange={(index) => this.setState({ selectedIndex: index })}
-				    				>
-				    					{this.renderRoomList()}
-				    				</Picker>
-	    						</View>
-	    					</View>
-    					</View>
-    					<View style={styles.wizardStep}>
-	    					<Text style={styles.wizardStepText}>Desired Date</Text>
-	    					<View style={styles.wizardstepAction}>
-	    						<View style={{flex: 1}}>
-				    				<View style={styles.timeWrapper}>
-				    					<TouchableHighlight onPress={this.onPressSetDate.bind(this, 'min', {date: this.state.selectedDate, minDate: new Date()})} style={styles.selectedDateTimeTouchable} underlayColor={'#e5e5e5'}>
-				    						<Text style={styles.dateTime}>{Moment(this.state.selectedDate).format("MMMM Do YYYY")}</Text>
-				    					</TouchableHighlight>
-				    				</View>
-	    						</View>
-	    					</View>
-    					</View>
-    					<View style={styles.wizardStep}>
-    						<View style={{flexDirection: 'row'}}>
-    							<Text style={styles.wizardStepText}>In-Out Time </Text>
-    							<TouchableHighlight 
-    								onPress={this.onPressHelp}
-    								underlayColor={'#e5e5e5'}
-    							>
-    								<Text style={styles.wizardStepText}>[?]</Text>
-    							</TouchableHighlight>
-    						</View>
-	    					<View style={styles.wizardstepAction}>
-	    						<View style={{flex: 1}}>
-				    				<View style={styles.timeWrapper}>
-				    					<TouchableHighlight 
-				    						onPress={this.onPressSetInOutTime.bind(this, "IN", {hour: this._parseHour(this.state.selectedInTime), minute: this._parseMinute(this.state.selectedInTime)})} 
-				    						style={styles.selectedDateTimeTouchable} 
-				    						underlayColor={'#e5e5e5'}
-				    					>
-				    						<Text style={styles.dateTime}>IN: <Text style={styles.selectedDateTime}>{this._prettyPrintTime(this.state.selectedInTime)}</Text></Text>
-				    					</TouchableHighlight>
-				    					<TouchableHighlight 
-				    						onPress={this.onPressSetInOutTime.bind(this, "OUT", {hour: this._parseHour(this.state.selectedOutTime), minute: this._parseMinute(this.state.selectedOutTime)})} 
-				    						style={styles.selectedDateTimeTouchable} 
-				    						underlayColor={'#e5e5e5'}
-				    					>
-				    						<Text style={styles.dateTime}>OUT: <Text style={styles.selectedDateTime}>{this._prettyPrintTime(this.state.selectedOutTime)}</Text></Text>
-				    					</TouchableHighlight>				    					
-				    				</View>
-	    						</View>
-	    					</View>
     					</View>
     					<View style={{flex: 1, justifyContent: 'flex-end', padding: 20, flexDirection: 'row'}}>
     						<TouchableHighlight 
@@ -176,58 +100,9 @@ module.exports = React.createClass({
     						</TouchableHighlight>
     						<Image source={this.state.loader} style={styles.loaderImage} />
     					</View>
-    				</View>
     			</ScrollView>
   			</View>
 		)
-	},
-	renderLoadingView: function(){
-		return <LoadingView title={'New Booking'} navigator={this.props.navigator} navIcon={require('../../assets/images/arrow_back.png')} />
-	},
-	renderRoomList: function(){
-		return this.state.rawData.map(function(room){
-			return(
- 				<Picker.Item label={room.room_name} value={room.room_mac_id} key={room.room_mac_id}></Picker.Item>
-			);
-		});		
-	},
-	onPressSetInOutTime: async function(mode, options){
-		var {action, minute, hour} = await TimePickerAndroid.open(options);
-
-		if(!(action === TimePickerAndroid.timeSetAction)){
-			return;
-		}
-
-		if(minute>0 && minute<30){
-			minute=30;
-		}
-		else if(minute>30){
-			
-			minute=0;
-			
-			if(hour===23){
-				hour=0;
-			}
-			else{
-				hour++;
-			}
-		}
-
-		switch(mode){
-			case "IN"	: 	this.setState({ selectedInTime: hour + ":" + minute });
-							break;
-			case "OUT"	: 	this.setState({ selectedOutTime: hour + ":" + minute });
-							break;
-		}
-	},
-	onPressSetDate: async function(mode, options){
-		const {action, year, month, day} = await DatePickerAndroid.open(options);
-		if (action === DatePickerAndroid.dismissedAction) {
-			return;
-		}
-		var dateString = year + "-" + ((month+1)<10 ? "0"+(month+1) : month+1) + "-" + (day < 10 ? "0"+day : day);
-		var date = new Date(dateString);
-		this.setState({ selectedDate: date });
 	},
 	onPressCancel: function(){
 		var _this = this;
@@ -333,37 +208,7 @@ module.exports = React.createClass({
 			}			
 		);
 	},
-	onPressHelp: function(){
-		var _this = this;
-		Alert.alert(
-			"What's wrong with the time?",
-			"Your time is automatically adjusted to the next half-hour slot.",
-            [
-              	{text: 'OK', onPress: () => console.log('Cancel Pressed!')}
-            ]
-		);		
-	},
-	_parseHour: function(time){
-		return parseInt(time.slice(0, time.indexOf(":")));
-	},
-	_parseMinute: function(time){
-		return parseInt(time.substr(time.indexOf(":") + 1));
-	},
-	_prettyPrintTime: function(time){
-		var hour = this._parseHour(time);
-		var minute = this._parseMinute(time);
-
-		hour = hour < 9 ? "0" + hour : hour.toString();
-		minute = minute < 9 ? "0" + minute : minute.toString();
-		return hour + ":" + minute;
-	},
 });
-
-function roundToNextSlot(start){
-	var ROUNDING = 30 * 60 * 1000; /*ms*/
-	start = Moment(Math.ceil((+start) / ROUNDING) * ROUNDING);
-	return start;
-}
 
 const styles = StyleSheet.create({
 	container: {

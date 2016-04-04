@@ -69,14 +69,14 @@ const styles = StyleSheet.create({
 		flex: 4
 	},
 	circle: {
-		width: 45,
-		height: 45,
-		borderRadius: 22.5,
+		width: 50,
+		height: 50,
+		borderRadius: 25	,
 		alignItems: 'center',
 		justifyContent: 'center',
 	},
 	alphabet: {
-		fontSize: 22,
+		fontSize: 24,
 		color: '#ffffff'
 	}
 });

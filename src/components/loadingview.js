@@ -28,12 +28,12 @@ const styles = StyleSheet.create({
 	},
 	loadingScene: {
 		flex: 1,
-		backgroundColor: '#eeeeee',
+		backgroundColor: '#ffffff',
 		alignItems: 'center',
 		justifyContent: 'center'
 	},
 	loader: {
-		width: width,
-		height: width * (width/height)
+		width: 200,
+		height: 150
 	}
 });

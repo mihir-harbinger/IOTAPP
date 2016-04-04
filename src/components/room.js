@@ -12,13 +12,16 @@ module.exports = React.createClass({
 
 	render: function(){
 		return(
-			<TouchableHighlight style={styles.wrapper} underlayColor={'#939393'}>
+			<TouchableHighlight style={styles.wrapper} underlayColor={'#939393'} onPress={this.onPressRoom}>
 				<View style={styles.container}>
 					<Text style={styles.title}>{this.props.data.room_name}</Text>
 					<Text style={styles.location}>{this.props.data.room_location == 'GP' ? 'Global Port' : this.props.data.room_location}</Text>
 				</View>
 			</TouchableHighlight>
 		);
+	},
+	onPressRoom: function(){
+		this.props.navigator.push({ name: 'newbooking' });
 	}
 });
 
@@ -31,10 +34,12 @@ const styles = StyleSheet.create({
 	wrapper: {
 		borderBottomWidth: 1,
 		borderBottomColor: '#e8e8e8'
-
 	},
 	title: {
 		fontSize: 22,
-		color: '#a7a7a7'
+		color: '#777777'
+	},
+	location: {
+		color: '#adadad'
 	}
-});
+})
