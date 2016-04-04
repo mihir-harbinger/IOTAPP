@@ -2,7 +2,6 @@
 var React = require('react-native');
 
 var {
-	TouchableNativeFeedback,
   	TouchableHighlight,
   	ScrollView,
   	StyleSheet,
@@ -19,12 +18,9 @@ var Moment = require('moment');
 
 //get components
 var ToolbarAfterLoad = require('../components/toolbarAfterLoad');
-var LoadingView = require('../components/loadingview');
-var ReloadView = require('../components/reloadview');
-var Icon = require('react-native-vector-icons/MaterialIcons');
-var Room = require('../components/room');
 var LoaderImage = require('../../assets/images/rolling.gif');
-var BlankImage = require('../../assets/images/1x1.png')
+var BlankImage = require('../../assets/images/1x1.png');
+var Icon = require('react-native-vector-icons/MaterialIcons');
 
 module.exports = React.createClass({
 	getInitialState: function(){
@@ -32,7 +28,6 @@ module.exports = React.createClass({
 			title: '',
 			description: '',
 			errorTitle: '',
-			errorDescription: '',
 			disableSubmit: false,
 			buttonColor: '#0288D1',
 			loader: BlankImage
@@ -43,64 +38,79 @@ module.exports = React.createClass({
     		<View style={styles.container}>
           		<ToolbarAfterLoad
           			navIcon={require('../../assets/images/arrow_back.png')}
-	        		title={'New Booking'}
+	        		title={''}
     	    		navigator={this.props.navigator}
         			sidebarRef={this}
         			isChildView={true}
       			/>
-    			<ScrollView style={styles.body} keyboardShouldPersistTaps={true}>
-    				<View style={styles.wizardWrapper}>
-    					<View style={styles.wizardStep}>
-	    					<Text style={styles.wizardStepText}>Meeting Title</Text>
-	    					<View style={styles.wizardstepAction}>
-	    						<View style={{flex: 1}}>
-	    							<TextInput 
-	    								underlineColorAndroid={'#cccccc'} 
-	    								style={styles.input}
-	    								autoCapitalize={'words'}
-	    								autoCorrect={false}
-	    								onChangeText={(text) =>this.setState({title: text, errorTitle: ''})}
-	    							>
-	    							</TextInput>
-	    							<Text style={styles.errorMessage}>{this.state.errorTitle}</Text>
-	    						</View>
-	    					</View>
-    					</View>
-    					<View style={styles.wizardStep}>
-	    					<Text style={styles.wizardStepText}>Meeting Description</Text>
-	    					<View style={styles.wizardstepAction}>
-	    						<View style={{flex: 1}}>
-	    							<TextInput 
-	    								underlineColorAndroid={'#cccccc'} 
-	    								style={styles.input}
-	    								autoCapitalize={'sentences'}
-	    								autoCorrect={false}
-	    								onChangeText={(text) =>this.setState({description: text, errorDescription: ''})}
-	    							>
-	    							</TextInput>
-	    							<Text style={styles.errorMessage}>{this.state.errorDescription}</Text>
-	    						</View>
-	    					</View>
-    					</View>
-    					</View>
-    					<View style={{flex: 1, justifyContent: 'flex-end', padding: 20, flexDirection: 'row'}}>
-    						<TouchableHighlight 
-    							underlayColor={'#f5f5f5'} 
-    							style={styles.buttonTouchable}
-    							onPress={this.onPressCancel}
-    						>
-    							<Text style={[styles.button, styles.gray]}>CANCEL</Text>
-    						</TouchableHighlight>
-    						<TouchableHighlight 
-    							underlayColor={'#f5f5f5'} 
-    							style={styles.buttonTouchable}
-    							onPress={this.onPressCheckAvailability}
-    						>
-    							<Text style={[styles.button, {color: this.state.buttonColor}]}>CHECK AVAILABILITY</Text>
-    						</TouchableHighlight>
-    						<Image source={this.state.loader} style={styles.loaderImage} />
-    					</View>
-    			</ScrollView>
+    			<View style={styles.body} keyboardShouldPersistTaps={true}>
+    				<View style={styles.panel} elevation={3}>
+    					<Text style={{color: '#ffffff'}}>Title</Text>
+    					<TextInput
+							underlineColorAndroid={'#E1F5FE'} 
+							style={styles.inputTitle}
+							autoFocus={true}
+							autoCapitalize={'words'}
+							autoCorrect={false}
+							onChangeText={(text) =>this.setState({title: text, errorTitle: ''})}
+    					/>
+    					<Text style={styles.errorMessage}>{this.state.errorTitle}</Text>
+						<TextInput 
+							underlineColorAndroid={'#E1F5FE'} 
+							placeholder={'Description'}
+							placeholderTextColor={'#B3E5FC'}
+							style={styles.input}
+							autoCapitalize={'sentences'}
+							autoCorrect={false}
+							onChangeText={(text) =>this.setState({description: text})}
+						>
+						</TextInput>
+
+    				</View>
+					<View style={{padding: 10}}>
+						<View style={styles.detailWrapper}>
+							<View style={styles.heading}>
+								<Icon name="label" size={20} color="#cccccc" />
+							</View>
+							<View style={styles.info}>
+								<Text>{this.props.data.room_name}</Text>
+							</View>
+						</View>    					
+						<View style={styles.detailWrapper}>
+							<View style={styles.heading}>
+								<Icon name="event-available" size={20} color="#cccccc" />
+							</View>
+							<View style={styles.info}>
+								<Text>{Moment(this.props.params.date, "D-M-YYYY").format("MMMM Do YYYY")}</Text>
+							</View>
+						</View>
+						<View style={styles.detailWrapper}>
+							<View style={styles.heading}>
+								<Icon name="access-time" size={20} color="#cccccc" />
+							</View>
+							<View style={styles.info}>
+								<Text>{Moment(this.props.params.inTime, "H.m").format("H:mm") + " - " + Moment(this.props.params.outTime, "H.m").format("H:mm")}</Text>
+							</View>
+						</View>
+					</View>
+					<View style={{flex: 1, justifyContent: 'flex-end', padding: 20, flexDirection: 'row'}}>
+						<TouchableHighlight 
+							underlayColor={'#f5f5f5'} 
+							style={styles.buttonTouchable}
+							onPress={this.onPressCancel}
+						>
+							<Text style={[styles.button, styles.gray]}>CANCEL</Text>
+						</TouchableHighlight>
+						<TouchableHighlight 
+							underlayColor={'#f5f5f5'} 
+							style={styles.buttonTouchable}
+							onPress={this.onPressConfirm}
+						>
+							<Text style={[styles.button, {color: this.state.buttonColor}]}>CONFIRM</Text>
+						</TouchableHighlight>
+						<Image source={this.state.loader} style={styles.loaderImage} />
+					</View>
+    			</View>
   			</View>
 		)
 	},
@@ -115,7 +125,7 @@ module.exports = React.createClass({
             ]
 		)
 	},
-	onPressCheckAvailability: function(){
+	onPressConfirm: function(){
 
 		if(this.state.disableSubmit){
 			return;
@@ -125,88 +135,36 @@ module.exports = React.createClass({
 			this.setState({errorTitle: 'You need a cool title!'});
 			return;
 		}
-		if(this.state.description.length < 10 && this.state.description.length > 0){
-			this.setState({errorDescription: 'Please provide a proper description.'});
-			return;
-		}
 
 		var _this = this;
 		this.setState({ disableSubmit: true, buttonColor: '#939393', loader: LoaderImage });
 
-		var _bookFromTime = parseFloat(Moment(this.state.selectedInTime, "H:m").subtract(Moment().utcOffset(), "minutes").format("H.mm"));
-		var _bookToTime = parseFloat(Moment(this.state.selectedOutTime, "H:m").subtract(Moment().utcOffset(), "minutes").format("H.mm"));
-		var _bookDate = Moment(this.state.selectedDate).format("D-M-YYYY");
-		var _roomMacId = this.state.selectedIndex;
+		var _bookFromTime = parseFloat(Moment(this.props.params.inTime, "H.m").subtract(Moment().utcOffset(), "minutes").format("H.mm"));
+		var _bookToTime = parseFloat(Moment(this.props.params.outTime, "H.m").subtract(Moment().utcOffset(), "minutes").format("H.mm"));
+		var _bookDate = Moment(this.props.params.date, "D-M-YYYY").format("D-M-YYYY");
 		var _userId = Parse.User.current().getUsername();
 		var _title = this.state.title;
 		var _description = this.state.description;
 		var _statusId = 1;
-		var flag=false;
 
-		Parse.Cloud.run('searchRoomListForAvailableTime', {
-			bookfromtime: _bookFromTime,
-			booktotime: _bookToTime,
-			bookdate: _bookDate
+		Parse.Cloud.run('bookRoomFromAppCloudFunction', {
+			book_fromtime: _bookFromTime,
+			book_totime: _bookToTime,
+			book_date: _bookDate,
+			user_id: _userId,
+			title: _title,
+			description: _description,
+			status_id: _statusId
 		}).then(
 			function(result){
-				var i, roomList=[], roomStr='', messageString, messageTitle;
-				
-				for(i=0;i<result.length;i++){
-					if(result[i].room_mac_id===_roomMacId){
-						flag=true;
-					}
-					else{
-						roomList.push(result[i].room_name);
-					}
-				}
-				if(!flag){
-					roomStr = roomList.join(", ");
-					if(roomList.length<1){
-						messageTitle = "No room available"
-						messageString = "Perhaps, try another time slot?"
-					}
-					else{
-						messageTitle = "Room available"
-						messageString="Perhaps, try another room? " + (roomList.length > 1 ? roomStr+" are available " : roomStr+" is available ") + "in the same time slot.";
-					}
-
-					Alert.alert(
-						messageTitle,
-						messageString,
-			            [
-			              	{text: 'OK', onPress: () => _this.setState({ disableSubmit: false, buttonColor: '#0288D1', loader: BlankImage })}
-			            ]
-					)
-				}
-				else{
-					Parse.Cloud.run('bookRoomFromAppCloudFunction', {
-						book_fromtime: _bookFromTime,
-						book_totime: _bookToTime,
-						book_date: _bookDate,
-						room_mac_id: _roomMacId,
-						user_id: _userId,
-						title: _title,
-						description: _description,
-						status_id: _statusId
-					}).then(
-						function(result){
-							_this.props.navigator.replace({name: 'success', data: { date: Moment(_bookDate, "D-M-YYYY").format("MMMM Do YYYY"),}});
-							console.log("[NEW BOOKING API] Success: "+ JSON.stringify(result, null, 2));
-						},
-						function(error){
-							_this.setState({ disableSubmit: false, buttonColor: '#0288D1', loader: BlankImage });
-							console.log("[NEW BOOKING API] Error: "+ JSON.stringify(error, null, 2));
-						}
-					);					
-				}
+				_this.props.navigator.replace({name: 'success', data: { date: Moment(_bookDate, "D-M-YYYY").format("MMMM Do YYYY"),}});
 				console.log("[NEW BOOKING API] Success: "+ JSON.stringify(result, null, 2));
 			},
 			function(error){
-				flag=false;
 				_this.setState({ disableSubmit: false, buttonColor: '#0288D1', loader: BlankImage });
 				console.log("[NEW BOOKING API] Error: "+ JSON.stringify(error, null, 2));
-			}			
-		);
+			}
+		);							
 	},
 });
 
@@ -218,45 +176,48 @@ const styles = StyleSheet.create({
 		flex: 1,
 		backgroundColor: '#ffffff',
 	},
-	wizardWrapper: {
-		backgroundColor: '#ffffff',
-	},
-	wizardStep: {
-		borderBottomWidth: 1,
-		borderBottomColor: '#f5f5f5',
-		padding: 20,
-	},
-	wizardStepTitle: {
-		flexDirection: 'row',
-	},
-	wizardStepText: {
-		color: '#939393', 
-		fontSize: 15, 
-		marginTop: 4
-	},
-	wizardstepAction: {
-		flexDirection: 'row'
-	},
-	selectedDateTimeTouchable: {
-		padding: 10
-	},
-	dateTime:{
-		color: '#000000',
-		fontSize: 16
-	},
-	selectedDateTime: {
-		color: '#999999',
-		fontSize: 16
-	},
-	timeWrapper: {
-		flexDirection: 'row',
-		marginBottom: 5
+	panel: {
+		paddingRight: 10,
+		paddingBottom: 10,
+		paddingLeft: 75,
+		backgroundColor: '#4FC3F7',
+	},	
+	inputTitle: {
+		color: '#ffffff',
+		padding: 4,
+		height: 55,
+		fontSize: 26,
 	},
 	input: {
 		padding: 4,
-		height: 40,
+		height: 45,
 		fontSize: 16,
 	},
+	title: {
+		fontSize: 22,
+		fontWeight: 'bold'
+	},
+	description: {
+		marginTop: 2,
+		color: '#939393'
+	},
+	detailWrapper: {
+		borderBottomWidth: 1,
+		borderBottomColor: '#f5f5f5',
+		flexDirection: 'row',
+		paddingTop: 10,
+		paddingBottom: 10
+	},
+	heading: {
+		width: 70,
+		paddingLeft: 10
+	},
+	info: {
+		flex: 1
+	},
+	bold: {
+		fontWeight: 'bold'
+	},	
 	note: {
 		color: '#939393',
 		fontSize: 12,
@@ -280,9 +241,10 @@ const styles = StyleSheet.create({
 		color: '#939393',
 	},
 	errorMessage: {
-		color: '#ef5350',
+		color: '#1A237E',
 		fontSize: 12,
 		marginLeft: 3,
+		marginBottom: 10
 	},
 	loaderImage: {
 		width: 13, 

@@ -70,6 +70,7 @@ module.exports = React.createClass({
 				route={route} 
 				navigator={navigator} 
 				data={route.data}
+				params={route.params}
 			/>
 		);    	
     }

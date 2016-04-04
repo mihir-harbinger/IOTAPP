@@ -21,7 +21,7 @@ module.exports = React.createClass({
 		);
 	},
 	onPressRoom: function(){
-		this.props.navigator.push({ name: 'newbooking' });
+		this.props.navigator.push({ name: 'newbooking', data: this.props.data, params: this.props.params });
 	}
 });
 

@@ -111,12 +111,6 @@ module.exports = React.createClass({
 		);
 	},
 	render: function(){
-		// if(this.state.isReloadRequired){
-		// 	return this.renderReloadView();
-		// }
-		// if(!this.state.loaded){
-		// 	return this.renderLoadingView();
-		// }
 
 		return(
       		<DrawerLayoutAndroid
@@ -235,7 +229,7 @@ module.exports = React.createClass({
 	},
 	renderRoom: function(room){
 		return(
-			<Room data={room} navigator={this.props.navigator} />
+			<Room data={room} params={{date: this.state.selectedDate, inTime: this.state.selectedInTime, outTime: this.state.selectedOutTime}} navigator={this.props.navigator} />
 		)
 	},
 	renderEmptyView: function(){
@@ -311,6 +305,7 @@ module.exports = React.createClass({
 				}
 				this.setState({ selectedInTime: Moment(hour + ":" + minute, "H:m") });
 				if((Date.parse('01/01/2011 ' + Moment(hour + ":" + minute, "H:m").format("H:m:s")) >= Date.parse('01/01/2011 ' + Moment(this.state.selectedOutTime).format("H:m:s"))) && Moment(this.state.selectedOutTime).format("H:m") !== "0:0"){
+					ToastAndroid.show('Your in-time should be less than out-time', ToastAndroid.LONG);
 					break;
 				}
 				else{
@@ -324,6 +319,7 @@ module.exports = React.createClass({
 				}				
 				this.setState({ selectedOutTime: Moment(hour + ":" + minute, "H:m") });
 				if((Date.parse('01/01/2011 ' + Moment(this.state.selectedInTime).format("H:m:s")) >= Date.parse('01/01/2011 ' + Moment(hour + ":" + minute, "H:m").format("H:m:s"))) && hour + ":" + minute !== "0:0"){
+					ToastAndroid.show('Your in-time should be less than out-time', ToastAndroid.LONG);
 					break;				
 				}
 				else{
