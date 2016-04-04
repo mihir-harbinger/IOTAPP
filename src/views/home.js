@@ -45,6 +45,7 @@ module.exports = React.createClass({
         	}),
 			loaded: true,
 			isReloadRequired: false,
+			isEnabled: false,
 			selectedDate: Moment(),
 			selectedInTime: roundToNextSlot(Moment()),
 			selectedOutTime: roundToNextSlot(Moment()).add(30, "minutes")
@@ -77,7 +78,7 @@ module.exports = React.createClass({
 		var _bookToTime = parseFloat(Moment(this.state.selectedOutTime, "H:m").subtract(Moment().utcOffset(), "minutes").format("H.m"));
 		var _bookDate = Moment(this.state.selectedDate).format("D-M-YYYY");
 
-		this.setState({ rawData: [], isReloadRequired: false, loaded: false });
+		this.setState({ rawData: [], isReloadRequired: false, loaded: false, isEnabled: false });
 
 		Parse.Cloud.run('checkAvailibilityOfRooms', {
 			bookdate: _bookDate,
@@ -100,10 +101,11 @@ module.exports = React.createClass({
 					dataSource: _this.state.dataSource.cloneWithRows(cleanData),
 					loaded: true,
 					isReloadRequired: false,
+					isEnabled: true
 				});
 			},
 			function(error){
-				_this.setState({ isReloadRequired: true, loaded: false })
+				_this.setState({ isReloadRequired: true, loaded: false, isEnabled: true })
 				console.log("[HOME API] Error: "+ JSON.stringify(error, null, 2));
 			}
 		);
@@ -134,7 +136,7 @@ module.exports = React.createClass({
 					<PullToRefreshViewAndroid 
                 		style={styles.container}
                 		refeshing={this.state.isRefreshing}
-                		onRefresh={this.reloadData}
+                		onRefresh={this.loadData}
                 		enabled={this.state.isEnabled}
               		>
 	        			<View style={styles.body}>
@@ -215,7 +217,6 @@ module.exports = React.createClass({
 				<View style={styles.container}>
 					<View style={styles.listViewTitle}>
 						<Text style={{marginTop: 2}}>AVAILABLE ROOMS</Text>
-						<Text>{Moment(this.state.selectedInTime, "H:m").subtract(Moment().utcOffset(), "minutes").format("H.m") + " " + Moment(this.state.selectedOutTime, "H:m").subtract(Moment().utcOffset(), "minutes").format("H.m")}</Text>
 					</View>
 					<ListView 
 						dataSource={this.state.dataSource}
@@ -463,3 +464,5 @@ const styles = StyleSheet.create({
 		backgroundColor: '#ffffff',
 	}
 });
+
+	// <Text>{Moment(this.state.selectedInTime, "H:m").subtract(Moment().utcOffset(), "minutes").format("H.m") + " " + Moment(this.state.selectedOutTime, "H:m").subtract(Moment().utcOffset(), "minutes").format("H.m")}</Text>
