@@ -15,10 +15,6 @@ module.exports = React.createClass({
 	render: function(){
 		return(
 			<View style={styles.container}>
-          		<ToolbarBeforeLoad
-	        		title={this.props.title}
-	        		navigator={this.props.navigator}
-      			/>			
       			<View style={styles.reloadScene}>
       				<View style={styles.centerWeighted}>
       					<Image source={require('../../assets/images/uh_oh_transparent.png')} style={styles.errorImage}></Image>

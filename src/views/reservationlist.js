@@ -106,10 +106,10 @@ module.exports = React.createClass({
 		)
 	},
 	renderLoadingView: function(){
+		if(this.state.isReloadRequired){
+			return <ReloadView loadData={this.loadData} />
+		}		
 		return <LoadingView />
-	},
-	renderReloadView: function(){
-		return <ReloadView loadData={this.loadData} />
 	},
 	renderReservation: function(item){
 		return <MeetingItem item={item} navigator={this.props.navigator} />

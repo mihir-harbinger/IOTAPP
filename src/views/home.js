@@ -82,8 +82,8 @@ module.exports = React.createClass({
 
 		Parse.Cloud.run('checkAvailibilityOfRooms', {
 			bookdate: _bookDate,
-			bookfromtime: _bookFromTime,
-			booktotime: _bookToTime
+			reqfromtime: _bookFromTime,
+			reqtotime: _bookToTime
 		}).then(
 
 			function(result){
@@ -200,28 +200,36 @@ module.exports = React.createClass({
     	);
 	},
 	renderLoadingView: function(){
+		if(this.state.isReloadRequired){
+			return <ReloadView loadData={this.loadData} />
+		}		
 		return <LoadingView />
 	},
-	renderReloadView: function(){
-		return <ReloadView loadData={this.loadData} />
-	},
 	renderListView: function(){
+		if(this.state.rawData.length > 0){
+			return(
+				<View style={styles.container}>
+					<View style={styles.listViewTitle}>
+						<Text style={{marginTop: 2}}>AVAILABLE ROOMS</Text>
+					</View>
+					<ListView 
+						dataSource={this.state.dataSource}
+						renderRow={this.renderRoom}
+						style={styles.listView}
+					/>	
+				</View>		
+			);			
+		}
 		return(
-			<View style={styles.container}>
-				<View style={styles.listViewTitle}>
-					<Text style={{marginTop: 2}}>AVAILABLE ROOMS</Text>
-				</View>
-				<ListView 
-					dataSource={this.state.dataSource}
-					renderRow={this.renderRoom}
-					style={styles.listView}
-				/>	
+			<View style={[styles.container, {alignItems: 'center', justifyContent: 'center'}]}>
+				<Text>No luck. Perhaps, try a different time slot?</Text>
 			</View>		
-		);
+		);		
+
 	},
 	renderRoom: function(room){
 		return(
-			<Room data={room} params={{date: this.state.selectedDate, inTime: this.state.selectedInTime, outTime: this.state.selectedOutTime}} navigator={this.props.navigator} />
+			<Room data={room} params={{date: this.state.selectedDate, inTime: this.state.selectedInTime, outTime: this.state.selectedOutTime, loadData: this.loadData }} navigator={this.props.navigator} />
 		)
 	},
 	renderEmptyView: function(){
@@ -263,7 +271,8 @@ module.exports = React.createClass({
 		}
 		var dateString = year + "-" + ((month+1)<10 ? "0"+(month+1) : month+1) + "-" + (day < 10 ? "0"+day : day);
 		var date = new Date(dateString);
-		this.setState({ selectedDate: Moment(date) });		
+		this.setState({ selectedDate: Moment(date) });
+		this.loadData();
 	},
 	onPressChangeInOutTime: async function(mode, options){
 		var {action, minute, hour} = await TimePickerAndroid.open(options);
@@ -453,4 +462,4 @@ const styles = StyleSheet.create({
 	}
 });
 
-	// <Text>{Moment(this.state.selectedInTime, "H:m").subtract(Moment().utcOffset(), "minutes").format("H.m") + " " + Moment(this.state.selectedOutTime, "H:m").subtract(Moment().utcOffset(), "minutes").format("H.m")}</Text>
+//<Text>{Moment(this.state.selectedInTime, "H:m").subtract(Moment().utcOffset(), "minutes").format("H.m") + " " + Moment(this.state.selectedOutTime, "H:m").subtract(Moment().utcOffset(), "minutes").format("H.m")}</Text>

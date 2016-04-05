@@ -15,7 +15,7 @@ module.exports = React.createClass({
 			<View style={styles.container}>
 				<Image source={require('../../assets/images/success_transparent.gif')} style={styles.successImage} />
 				<Text style={{fontWeight: 'bold'}}>SUCCESS</Text>
-				<Text>We have reserved the room for you on</Text>
+				<Text>{"We have reserved " + this.props.data.room + " for you on"}</Text>
 				<Text>{this.props.data.date}</Text>
 				<TouchableHighlight underlayColor={'#e8e8e8'} onPress={this.onDismiss}>
 					<Text style={{fontSize: 15, color: '#4FC3F7', marginTop: 20}}>Tap to continue</Text>
@@ -24,6 +24,7 @@ module.exports = React.createClass({
 		);
 	},
 	onDismiss: function(){
+		this.props.data.loadData();
 		this.props.navigator.pop();
 	}
 })

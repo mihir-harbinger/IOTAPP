@@ -45,7 +45,7 @@ module.exports = React.createClass({
       			/>
     			<View style={styles.body} keyboardShouldPersistTaps={true}>
     				<View style={styles.panel} elevation={3}>
-    					<Text style={{color: '#ffffff'}}>Meeting Title</Text>
+    					<Text style={{color: '#ffffff', marginLeft: 2}}>Meeting Title</Text>
     					<TextInput
 							underlineColorAndroid={'#E1F5FE'} 
 							style={styles.inputTitle}
@@ -73,7 +73,7 @@ module.exports = React.createClass({
 								<Icon name="label" size={20} color="#cccccc" />
 							</View>
 							<View style={styles.info}>
-								<Text>{this.props.data.room_name}</Text>
+								<Text style={{fontSize: 15}}>{this.props.data.room_name}</Text>
 							</View>
 						</View>    					
 						<View style={styles.detailWrapper}>
@@ -81,7 +81,7 @@ module.exports = React.createClass({
 								<Icon name="event-available" size={20} color="#cccccc" />
 							</View>
 							<View style={styles.info}>
-								<Text>{Moment(this.props.params.date, "D-M-YYYY").format("MMMM Do YYYY")}</Text>
+								<Text style={{fontSize: 15}}>{Moment(this.props.params.date, "D-M-YYYY").format("MMMM Do YYYY")}</Text>
 							</View>
 						</View>
 						<View style={styles.detailWrapper}>
@@ -89,7 +89,7 @@ module.exports = React.createClass({
 								<Icon name="access-time" size={20} color="#cccccc" />
 							</View>
 							<View style={styles.info}>
-								<Text>{Moment(this.props.params.inTime, "H.m").format("H:mm") + " - " + Moment(this.props.params.outTime, "H.m").format("H:mm")}</Text>
+								<Text style={{fontSize: 15}}>{Moment(this.props.params.inTime, "H.m").format("H:mm") + " - " + Moment(this.props.params.outTime, "H.m").format("H:mm")}</Text>
 							</View>
 						</View>
 					</View>
@@ -142,6 +142,7 @@ module.exports = React.createClass({
 		var _bookFromTime = parseFloat(Moment(this.props.params.inTime, "H.m").subtract(Moment().utcOffset(), "minutes").format("H.mm"));
 		var _bookToTime = parseFloat(Moment(this.props.params.outTime, "H.m").subtract(Moment().utcOffset(), "minutes").format("H.mm"));
 		var _bookDate = Moment(this.props.params.date, "D-M-YYYY").format("D-M-YYYY");
+		var _roomMacId = this.props.data.room_mac_id;
 		var _userId = Parse.User.current().getUsername();
 		var _title = this.state.title;
 		var _description = this.state.description;
@@ -151,13 +152,14 @@ module.exports = React.createClass({
 			book_fromtime: _bookFromTime,
 			book_totime: _bookToTime,
 			book_date: _bookDate,
+			room_mac_id: _roomMacId,
 			user_id: _userId,
 			title: _title,
 			description: _description,
 			status_id: _statusId
 		}).then(
 			function(result){
-				_this.props.navigator.replace({name: 'success', data: { date: Moment(_bookDate, "D-M-YYYY").format("MMMM Do YYYY"),}});
+				_this.props.navigator.replace({name: 'success', data: { date: Moment(_bookDate, "D-M-YYYY").format("MMMM Do YYYY"), room: _this.props.data.room_name, loadData: _this.props.params.loadData} });
 				console.log("[NEW BOOKING API] Success: "+ JSON.stringify(result, null, 2));
 			},
 			function(error){
@@ -185,8 +187,8 @@ const styles = StyleSheet.create({
 	inputTitle: {
 		color: '#ffffff',
 		padding: 4,
-		height: 55,
-		fontSize: 26,
+		height: 62,
+		fontSize: 30,
 	},
 	input: {
 		color: '#ffffff',
