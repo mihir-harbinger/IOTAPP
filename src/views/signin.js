@@ -163,7 +163,9 @@ module.exports = React.createClass({
 			"Keep smiling"
 		]
 		interval = setInterval(function(){
-			_this.setState({ currentPhrase: phrases[Math.floor(Math.random()*phrases.length)] })
+			if(_this.isMounted()){
+				_this.setState({ currentPhrase: phrases[Math.floor(Math.random()*phrases.length)] })
+			}
 		}, 1500);
 	}
 });

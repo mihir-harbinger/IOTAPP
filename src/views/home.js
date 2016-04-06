@@ -305,9 +305,6 @@ module.exports = React.createClass({
 		switch(mode){
 			case "IN":
 				previousTime = this.state.selectedInTime;
-				if(isTimeAdjusted){
-					ToastAndroid.show('Your in-time was adjusted to '+Moment(hour + ":" + minute, "H:m").format("H:mm"), ToastAndroid.LONG);
-				}
 				this.setState({ selectedInTime: Moment(hour + ":" + minute, "H:m") });
 
 				if(Date.parse('01/01/2011 ' + Moment(this.selectedInTime).format("H:m:s")) <= Date.parse('01/01/2011 ' + Moment().format("H:m:s"))){
@@ -315,30 +312,31 @@ module.exports = React.createClass({
 					ToastAndroid.show('Invalid in-time', ToastAndroid.LONG);
 					break;
 				}
-				else if((Date.parse('01/01/2011 ' + Moment(hour + ":" + minute, "H:m").format("H:m:s")) >= Date.parse('01/01/2011 ' + Moment(this.state.selectedOutTime).format("H:m:s"))) && Moment(this.state.selectedOutTime).format("H:m") !== "0:0"){
+				if((Date.parse('01/01/2011 ' + Moment(hour + ":" + minute, "H:m").format("H:m:s")) >= Date.parse('01/01/2011 ' + Moment(this.state.selectedOutTime).format("H:m:s"))) && Moment(this.state.selectedOutTime).format("H:m") !== "0:0"){
 					this.setState({selectedInTime: previousTime});
 					ToastAndroid.show('Your in-time should be less than out-time', ToastAndroid.LONG);
 					break;
 				}
-				else{
-					this.loadData();
+				if(isTimeAdjusted){
+					ToastAndroid.show('Your in-time was adjusted to '+Moment(hour + ":" + minute, "H:m").format("H:mm"), ToastAndroid.LONG);
 				}
+				this.loadData();
+
 				break;
 
 			case "OUT":
 				previousTime = this.state.selectedOutTime;
-				if(isTimeAdjusted){
-					ToastAndroid.show('Your out-time was adjusted to '+Moment(hour + ":" + minute, "H:m").format("H:mm"), ToastAndroid.LONG);
-				}
 				this.setState({ selectedOutTime: Moment(hour + ":" + minute, "H:m") });
+				
 				if((Date.parse('01/01/2011 ' + Moment(this.state.selectedInTime).format("H:m:s")) >= Date.parse('01/01/2011 ' + Moment(hour + ":" + minute, "H:m").format("H:m:s"))) && hour + ":" + minute !== "0:0"){
 					ToastAndroid.show('Your in-time should be less than out-time', ToastAndroid.LONG);
 					this.setState({selectedOutTime: previousTime});
 					break;				
 				}
-				else{
-					this.loadData();
+				if(isTimeAdjusted){
+					ToastAndroid.show('Your out-time was adjusted to '+Moment(hour + ":" + minute, "H:m").format("H:mm"), ToastAndroid.LONG);
 				}
+				this.loadData();
 				break;
 		}		
 	},
