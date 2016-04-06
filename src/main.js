@@ -22,6 +22,7 @@ var Signup = require('./views/signup');
 var Home = require('./views/home');
 var NewBooking = require('./views/newbooking');
 var Success = require('./views/success');
+var Failure = require('./views/failure');
 var About = require('./views/about');
 var ReservationList = require('./views/reservationlist');
 var MeetingDetails = require('./views/meetingdetails');
@@ -34,6 +35,7 @@ var ROUTES = {
 	home: Home,
 	newbooking: NewBooking,
 	success: Success,
+	failure: Failure,
 	about: About,
 	reservationlist: ReservationList,
 	meetingdetails: MeetingDetails

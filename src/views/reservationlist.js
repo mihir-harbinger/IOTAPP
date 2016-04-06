@@ -5,6 +5,7 @@ var {
 	TouchableNativeFeedback,
 	InteractionManager,
   	TouchableHighlight,
+  	RefreshControl,
   	ScrollView,
   	StyleSheet,
   	ListView,
@@ -30,7 +31,9 @@ module.exports = React.createClass({
 				rowHasChanged: (row1, row2) => row1 !== row2
 			}),
 			loaded: true,
-			isReloadRequired: false
+			isReloadRequired: false,
+			isRefreshing: false,
+			isEnabled: true
 		}
 	},
 	componentWillMount: function(){
@@ -55,7 +58,7 @@ module.exports = React.createClass({
 	API: function(){
 
 		var _this = this;
-		this.setState({ rawData: [], isReloadRequired: false, loaded: false });
+		this.setState({ rawData: [], isReloadRequired: false, loaded: false, isRefreshing: true });
 
 		Parse.Cloud.run('fetchBookingListForUserCloudFunction', {
 			user_id: Parse.User.current().getUsername()
@@ -72,10 +75,11 @@ module.exports = React.createClass({
 					dataSource: _this.state.dataSource.cloneWithRows(cleanData),
 					loaded: true,
 					isReloadRequired: false,
+					isRefreshing: false,
 				});
 			},
 			function(error){
-				_this.setState({ isReloadRequired: true, loaded: false })
+				_this.setState({ isReloadRequired: true, loaded: false, isRefreshing: false })
 				console.log("[HOME API] Error: "+ JSON.stringify(error, null, 2));
 			}
 		);
@@ -90,26 +94,41 @@ module.exports = React.createClass({
         			sidebarRef={this}
         			isChildView={true}
       			/>
-      			{this.state.loaded ? this.renderListView() : this.renderLoadingView()}
+					{this.state.loaded ? this.renderListView() : this.renderLoadingView()}
   			</View>
 		)
 	},
 	renderListView: function(){
 		return(
-			<ScrollView style={styles.body}>
-				<ListView 
-    				dataSource={this.state.dataSource}
-        			renderRow={this.renderReservation}
-        			style={styles.listView}
-        		/>
-			</ScrollView>
-		)
+			<ScrollView
+				refreshControl={
+					<RefreshControl 
+                		refreshing={this.state.isRefreshing}
+                		onRefresh={this.loadData}
+					/>
+            	}
+			>
+			<ListView 
+				dataSource={this.state.dataSource}
+    			renderRow={this.renderReservation}
+    			style={styles.listView}
+    		/>
+    		</ScrollView>
+		);
 	},
 	renderLoadingView: function(){
 		if(this.state.isReloadRequired){
-			return <ReloadView loadData={this.loadData} />
-		}		
-		return <LoadingView />
+			return(
+				<View style={styles.container}>
+					<ReloadView loadData={this.loadData} />
+				</View>
+			)
+		}	
+		return(
+			<View style={styles.container}>
+				<LoadingView />
+			</View>
+		)
 	},
 	renderReservation: function(item){
 		return <MeetingItem item={item} navigator={this.props.navigator} />

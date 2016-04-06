@@ -11,7 +11,6 @@ var {
   	ToastAndroid,
   	ScrollView,
   	StyleSheet,
-  	Dimensions,
   	TextInput,
   	ListView,
   	Platform,
@@ -32,9 +31,6 @@ var ReloadView = require('../components/reloadview');
 var Icon = require('react-native-vector-icons/MaterialIcons');
 var Room = require('../components/room');
 
-//get dimensions
-const {height, width} = Dimensions.get('window');
-
 module.exports = React.createClass({
 
 	getInitialState: function(){
@@ -46,6 +42,7 @@ module.exports = React.createClass({
 			loaded: true,
 			isReloadRequired: false,
 			isEnabled: false,
+			isRefreshing: false,
 			selectedDate: Moment(),
 			selectedInTime: roundToNextSlot(Moment()),
 			selectedOutTime: roundToNextSlot(Moment()).add(30, "minutes")
@@ -78,7 +75,7 @@ module.exports = React.createClass({
 		var _bookToTime = parseFloat(Moment(this.state.selectedOutTime, "H:m").subtract(Moment().utcOffset(), "minutes").format("H.m"));
 		var _bookDate = Moment(Moment(this.state.selectedDate).format("D-M-YYYY") + " " + Moment(this.state.selectedInTime, "H:m").format("H.m"), "D-M-YYYY H:m").subtract(Moment().utcOffset(), "minutes").format("D-M-YYYY");
 
-		this.setState({ rawData: [], isReloadRequired: false, loaded: false, isEnabled: false });
+		this.setState({ rawData: [], isReloadRequired: false, loaded: false, isEnabled: false, isRefreshing: true });
 
 		Parse.Cloud.run('checkAvailibilityOfRooms', {
 			bookdate: _bookDate,
@@ -101,11 +98,12 @@ module.exports = React.createClass({
 					dataSource: _this.state.dataSource.cloneWithRows(cleanData),
 					loaded: true,
 					isReloadRequired: false,
-					isEnabled: true
+					isEnabled: true,
+					isRefreshing: false
 				});
 			},
 			function(error){
-				_this.setState({ isReloadRequired: true, loaded: false, isEnabled: true })
+				_this.setState({ isReloadRequired: true, loaded: false, isEnabled: true, isRefreshing: false })
 				console.log("[HOME API] Error: "+ JSON.stringify(error, null, 2));
 			}
 		);

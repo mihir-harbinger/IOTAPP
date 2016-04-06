@@ -30,7 +30,8 @@ module.exports = React.createClass({
 			errorTitle: '',
 			disableSubmit: false,
 			buttonColor: '#0288D1',
-			loader: BlankImage
+			loader: BlankImage,
+			bookingResult: ''
 		}
 	},
 	render: function(){
@@ -95,6 +96,7 @@ module.exports = React.createClass({
 						</View>
 					</View>
 					<View style={{ padding: 20, flexDirection: 'row', justifyContent: 'flex-end'}}>
+						<Text>{this.state.bookingResult}</Text>
 						<Image source={this.state.loader} style={styles.loaderImage} />
                 		<TouchableHighlight 
 							underlayColor={'#f5f5f5'} 
@@ -160,7 +162,12 @@ module.exports = React.createClass({
 			status_id: _statusId
 		}).then(
 			function(result){
-				_this.props.navigator.replace({name: 'success', data: { date: Moment(_bookDate, "D-M-YYYY").format("MMMM Do YYYY"), room: _this.props.data.room_name, loadData: _this.props.params.loadData} });
+				if(result ==="You CANNOT book room"){
+					_this.props.navigator.replace({name: 'failure', data: { date: Moment(_bookDate, "D-M-YYYY").format("MMMM Do YYYY"), room: _this.props.data.room_name, loadData: _this.props.params.loadData} });					
+				}
+				else{
+					_this.props.navigator.replace({name: 'success', data: { date: Moment(_bookDate, "D-M-YYYY").format("MMMM Do YYYY"), room: _this.props.data.room_name, loadData: _this.props.params.loadData} });
+				}
 				console.log("[NEW BOOKING API] Success: "+ JSON.stringify(result, null, 2));
 			},
 			function(error){

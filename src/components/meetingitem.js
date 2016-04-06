@@ -49,14 +49,14 @@ function titleCase(string) { return string.toUpperCase(); }
 const styles = StyleSheet.create({
 	wrapper: {
 		flex: 1,
-		padding: 20,
+		padding: 15,
 		borderBottomWidth: 1,
 		borderBottomColor: '#f5f5f5',
 		flexDirection: 'row'
 	},
 	title: {
-		fontSize: 18,
-		color: '#666666'
+		fontSize: 16,
+		color: '#2e2e2e'
 	},
 	timestamp: {
 		color: '#999999',
@@ -69,14 +69,14 @@ const styles = StyleSheet.create({
 		flex: 4
 	},
 	circle: {
-		width: 50,
-		height: 50,
-		borderRadius: 25	,
+		width: 45,
+		height: 45,
+		borderRadius: 22.5,
 		alignItems: 'center',
 		justifyContent: 'center',
 	},
 	alphabet: {
-		fontSize: 24,
+		fontSize: 22,
 		color: '#ffffff'
 	}
 });
