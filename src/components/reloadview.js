@@ -1,6 +1,7 @@
 var React = require('react-native');
 
 var {
+	TouchableWithoutFeedback,
 	StyleSheet,
 	Image,
 	View,
@@ -15,13 +16,15 @@ module.exports = React.createClass({
 	render: function(){
 		return(
 			<View style={styles.container}>
+				<TouchableWithoutFeedback  onPress={ this.loadData }>
       			<View style={styles.reloadScene}>
       				<View style={styles.centerWeighted}>
-      					<Image source={require('../../assets/images/uh_oh_transparent.png')} style={styles.errorImage}></Image>
-      					<Text style={styles.errorMessageReload}>Oops! Something went wrong :(</Text>
-      					<Icon name="replay" size={25} color="#999999" style={styles.reloadArrow} onPress={ this.loadData } />      					
+      					<Icon name="wifi" size={100} color="#cccccc" style={styles.reloadArrow} />
+      					<Text style={styles.errorMessageReload}>Oops! Something went wrong.</Text>
+      					<Text>Tap to reload.</Text>
       				</View>
 				</View>
+				</TouchableWithoutFeedback>
 			</View>
 		);
 	},
@@ -42,10 +45,6 @@ const styles = StyleSheet.create({
 		flex: 1,
 		alignItems: 'center',
 		justifyContent: 'center'		
-	},
-	errorImage: {
-		width: 300,
-		height: 225
 	},
 	reloadArrow: {
 		alignSelf: 'center',

@@ -2,7 +2,7 @@
 var React = require('react-native');
 
 var {
-	TouchableNativeFeedback,
+	TouchableWithoutFeedback,
 	InteractionManager,
   	TouchableHighlight,
   	RefreshControl,
@@ -16,6 +16,7 @@ var {
 
 //get libraries
 var Parse = require('parse/react-native').Parse;
+var Icon = require('react-native-vector-icons/MaterialIcons');
 
 //get components
 var ToolbarAfterLoad = require('../components/toolbarAfterLoad');
@@ -99,6 +100,21 @@ module.exports = React.createClass({
 		)
 	},
 	renderListView: function(){
+		if(this.state.rawData.length === 0){
+			return(
+				<View style={styles.container}>
+					<TouchableWithoutFeedback onPress={this.onPressPop}>
+		      			<View style={styles.noRecordsFoundScene}>
+		      				<View style={styles.centerWeighted}>
+		      					<Icon name="error" size={100} color="#cccccc" />
+		      					<Text style={styles.errorMessageReload}>You have no meetings.</Text>
+		      					<Text>Tap to book.</Text>
+		      				</View>
+						</View>
+					</TouchableWithoutFeedback>
+				</View>
+			);
+		}
 		return(
 			<ScrollView
 				refreshControl={
@@ -108,13 +124,16 @@ module.exports = React.createClass({
 					/>
             	}
 			>
-			<ListView 
-				dataSource={this.state.dataSource}
-    			renderRow={this.renderReservation}
-    			style={styles.listView}
-    		/>
+				<ListView 
+					dataSource={this.state.dataSource}
+	    			renderRow={this.renderReservation}
+	    			style={styles.listView}
+	    		/>
     		</ScrollView>
-		);
+		);			
+	},
+	onPressPop: function(){
+		this.props.navigator.pop();
 	},
 	renderLoadingView: function(){
 		if(this.state.isReloadRequired){
@@ -146,4 +165,21 @@ const styles = StyleSheet.create({
 	listView:{
 		flex: 1
 	},
+	noRecordsFoundScene:{
+		flex: 1,
+		backgroundColor: '#ffffff',
+	},
+	centerWeighted: {
+		flex: 1,
+		alignItems: 'center',
+		justifyContent: 'center'		
+	},
+	reloadArrow: {
+		alignSelf: 'center',
+		margin: 10,
+	},
+	errorMessageReload: {
+		alignSelf: 'center',
+		fontSize: 15
+	}
 });

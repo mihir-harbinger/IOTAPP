@@ -108,7 +108,7 @@ module.exports = React.createClass({
 
 		this.setState({ interactionDisabled: true, message: 'Just a moment...', messageColor: '#cccccc' })
 		user.signUp(null, {
-			success: (user) => { console.log(user);this.props.navigator.immediatelyResetRouteStack([{name: 'home'}]); },
+			success: (user) => { console.log(user);_this.props.navigator.immediatelyResetRouteStack([{name: 'home'}]); },
 			error: (user, error) => { 
 
 				var errorText;
@@ -123,9 +123,19 @@ module.exports = React.createClass({
 								break;
 				}
 				console.log(error);
-				this.setState({ interactionDisabled: false, message: errorText, messageColor: '#e53935' });
+				_this.setState({ interactionDisabled: false, message: errorText, messageColor: '#e53935' });
 			}
 		});
+		setTimeout(function(){
+			if(_this.state.interactionDisabled === true){
+				clearInterval(interval);
+				_this.setState({
+					message: 'Something went wrong. Please try again.',
+					messageColor: '#e53935',
+					interactionDisabled: false
+				})
+			}
+		}, 10000);		
 	}
 });
 

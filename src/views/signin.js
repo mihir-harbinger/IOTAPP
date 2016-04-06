@@ -71,6 +71,8 @@ module.exports = React.createClass({
 	},
 	onLoginPress: function(){
 
+		var _this = this;
+
 		if(this.state.interactionDisabled){
 			return;
 		}
@@ -93,12 +95,12 @@ module.exports = React.createClass({
 			success: (user) => { 
 
 				clearInterval(interval);
-				this.setState({
+				_this.setState({
 					currentPhrase: '',
 					interactionDisabled: false
 				});
 				console.log(user);
-				this.props.navigator.immediatelyResetRouteStack([{name: 'home'}]);
+				_this.props.navigator.immediatelyResetRouteStack([{name: 'home'}]);
 			},
 			error: (data, error) => {
 				console.log(data, error);
@@ -113,13 +115,23 @@ module.exports = React.createClass({
 								break;
 				}
 				clearInterval(interval);
-				this.setState({
+				_this.setState({
 					currentPhrase: errorText,
 					phraseColor: '#1A237E',
 					interactionDisabled: false
 				});
 			}
-		});		
+		});
+		setTimeout(function(){
+			if(_this.state.interactionDisabled === true){
+				clearInterval(interval);
+				_this.setState({
+					currentPhrase: 'Something went wrong. Please try again.',
+					phraseColor: '#1A237E',
+					interactionDisabled: false
+				})
+			}
+		}, 10000);
 	},
 	onSignupPress: function(){
 		if(!this.state.interactionDisabled){

@@ -11,6 +11,7 @@ var {
   	ToastAndroid,
   	ScrollView,
   	StyleSheet,
+  	Dimensions,
   	TextInput,
   	ListView,
   	Platform,
@@ -30,6 +31,9 @@ var LoadingView = require('../components/loadingview');
 var ReloadView = require('../components/reloadview');
 var Icon = require('react-native-vector-icons/MaterialIcons');
 var Room = require('../components/room');
+
+//get device dimensions
+const {height, width} = Dimensions.get('window');
 
 module.exports = React.createClass({
 
@@ -94,7 +98,7 @@ module.exports = React.createClass({
 				console.log("[HOME API] Success: ", cleanData);
 
 				_this.setState({ 
-					rawData: _this.state.rawData.concat(cleanData),
+					rawData: cleanData,
 					dataSource: _this.state.dataSource.cloneWithRows(cleanData),
 					loaded: true,
 					isReloadRequired: false,
@@ -214,13 +218,14 @@ module.exports = React.createClass({
 						dataSource={this.state.dataSource}
 						renderRow={this.renderRoom}
 						style={styles.listView}
-					/>	
-				</View>		
+					/>
+				</View>
 			);			
 		}
 		return(
 			<View style={[styles.container, {alignItems: 'center', justifyContent: 'center'}]}>
 				<Text>No luck. Perhaps, try a different time slot?</Text>
+				<Text>Or pull down to refresh list.</Text>
 			</View>		
 		);		
 
@@ -242,19 +247,19 @@ module.exports = React.createClass({
 				<View style={styles.sidebarBody}>
 					<TouchableHighlight underlayColor={'#f5f5f5'} onPress={this.onPressReservationList}>
 						<View style={styles.sidebarItem}>
-							<Icon name="list" size={26} color="#999999" />
+							<Icon name="list" size={24} color="#999999" />
 							<Text style={styles.sidebarItemtext}>My Reservations</Text>
 						</View>
 					</TouchableHighlight>
 					<TouchableHighlight underlayColor={'#f5f5f5'}>
 						<View style={styles.sidebarItem}>
-							<Icon name="error-outline" size={26} color="#999999" />
+							<Icon name="error-outline" size={24} color="#999999" />
 							<Text style={styles.sidebarItemtext}>Important Meetings</Text>
 						</View>
 					</TouchableHighlight>
 					<TouchableHighlight underlayColor={'#f5f5f5'}>
 						<View style={styles.sidebarItem}>
-							<Icon name="settings" size={26} color="#999999" />
+							<Icon name="settings" size={24} color="#999999" />
 							<Text style={styles.sidebarItemtext}>Configuration</Text>
 						</View>
 					</TouchableHighlight>
@@ -399,8 +404,9 @@ const styles = StyleSheet.create({
 		flexDirection: 'row'
 	},
 	sidebarItemtext: {
-		fontSize: 17,
+		fontSize: 15,
 		marginLeft: 20,
+		marginTop: 1.5,
 		color: '#888888'
 	},
 	panel: {
