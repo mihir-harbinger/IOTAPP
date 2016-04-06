@@ -45,23 +45,21 @@ module.exports = React.createClass({
       			/>
     			<View style={styles.body} keyboardShouldPersistTaps={true}>
     				<View style={styles.panel} elevation={3}>
-    					<Text style={{color: '#ffffff', marginLeft: 2}}>Meeting Title</Text>
+    					<Text style={{color: '#ffffff', marginLeft: 2}}>Title</Text>
     					<TextInput
 							underlineColorAndroid={'#E1F5FE'} 
 							style={styles.inputTitle}
 							autoFocus={true}
 							autoCapitalize={'words'}
-							autoCorrect={false}
 							onChangeText={(text) =>this.setState({title: text, errorTitle: ''})}
     					/>
     					<Text style={styles.errorMessage}>{this.state.errorTitle}</Text>
 						<TextInput 
-							underlineColorAndroid={'#E1F5FE'} 
 							placeholder={'Description'}
 							placeholderTextColor={'#B3E5FC'}
+							underlineColorAndroid={'#E1F5FE'}
 							style={styles.input}
 							autoCapitalize={'sentences'}
-							autoCorrect={false}
 							onChangeText={(text) =>this.setState({description: text})}
 						>
 						</TextInput>
@@ -70,31 +68,35 @@ module.exports = React.createClass({
 					<View style={{padding: 10}}>
 						<View style={styles.detailWrapper}>
 							<View style={styles.heading}>
-								<Icon name="label" size={20} color="#cccccc" />
+								<Icon name="label" size={20} color="#939393" />
 							</View>
 							<View style={styles.info}>
+								<Text style={{fontSize: 15, fontWeight: 'bold', marginBottom: 5, color: '#4b4b4b'}}>Room Name</Text>
 								<Text style={{fontSize: 15}}>{this.props.data.room_name}</Text>
 							</View>
-						</View>    					
+						</View>
 						<View style={styles.detailWrapper}>
 							<View style={styles.heading}>
-								<Icon name="event-available" size={20} color="#cccccc" />
+								<Icon name="event-available" size={20} color="#939393" />
 							</View>
 							<View style={styles.info}>
+								<Text style={{fontSize: 15, fontWeight: 'bold', marginBottom: 5, color: '#4b4b4b'}}>Booking Date</Text>
 								<Text style={{fontSize: 15}}>{Moment(this.props.params.date, "D-M-YYYY").format("MMMM Do YYYY")}</Text>
 							</View>
 						</View>
 						<View style={styles.detailWrapper}>
 							<View style={styles.heading}>
-								<Icon name="access-time" size={20} color="#cccccc" />
+								<Icon name="access-time" size={20} color="#939393" />
 							</View>
 							<View style={styles.info}>
+								<Text style={{fontSize: 15, fontWeight: 'bold', marginBottom: 5, color: '#4b4b4b'}}>In-Out Time</Text>
 								<Text style={{fontSize: 15}}>{Moment(this.props.params.inTime, "H.m").format("H:mm") + " - " + Moment(this.props.params.outTime, "H.m").format("H:mm")}</Text>
 							</View>
 						</View>
 					</View>
-					<View style={{flex: 1, justifyContent: 'flex-end', padding: 20, flexDirection: 'row'}}>
-						<TouchableHighlight 
+					<View style={{ padding: 20, flexDirection: 'row', justifyContent: 'flex-end'}}>
+						<Image source={this.state.loader} style={styles.loaderImage} />
+                		<TouchableHighlight 
 							underlayColor={'#f5f5f5'} 
 							style={styles.buttonTouchable}
 							onPress={this.onPressCancel}
@@ -108,7 +110,6 @@ module.exports = React.createClass({
 						>
 							<Text style={[styles.button, {color: this.state.buttonColor}]}>CONFIRM</Text>
 						</TouchableHighlight>
-						<Image source={this.state.loader} style={styles.loaderImage} />
 					</View>
     			</View>
   			</View>
@@ -141,7 +142,7 @@ module.exports = React.createClass({
 
 		var _bookFromTime = parseFloat(Moment(this.props.params.inTime, "H.m").subtract(Moment().utcOffset(), "minutes").format("H.mm"));
 		var _bookToTime = parseFloat(Moment(this.props.params.outTime, "H.m").subtract(Moment().utcOffset(), "minutes").format("H.mm"));
-		var _bookDate = Moment(this.props.params.date, "D-M-YYYY").format("D-M-YYYY");
+		var _bookDate = Moment(Moment(this.props.params.date).format("D-M-YYYY") + " " + Moment(this.props.params.inTime, "H:m").format("H.m"), "D-M-YYYY H:m").subtract(Moment().utcOffset(), "minutes").format("D-M-YYYY");
 		var _roomMacId = this.props.data.room_mac_id;
 		var _userId = Parse.User.current().getUsername();
 		var _title = this.state.title;
@@ -181,7 +182,7 @@ const styles = StyleSheet.create({
 	panel: {
 		paddingRight: 10,
 		paddingBottom: 10,
-		paddingLeft: 75,
+		paddingLeft: 55,
 		backgroundColor: '#4FC3F7',
 	},	
 	inputTitle: {
@@ -193,8 +194,8 @@ const styles = StyleSheet.create({
 	input: {
 		color: '#ffffff',
 		padding: 4,
-		height: 45,
-		fontSize: 16,
+		height: 40,
+		marginTop: 10
 	},
 	title: {
 		fontSize: 22,
@@ -212,7 +213,7 @@ const styles = StyleSheet.create({
 		paddingBottom: 10
 	},
 	heading: {
-		width: 70,
+		width: 50,
 		paddingLeft: 10
 	},
 	info: {

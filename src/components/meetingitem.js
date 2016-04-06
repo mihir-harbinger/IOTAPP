@@ -33,7 +33,7 @@ module.exports = React.createClass({
 					</View>
 					<View style={styles.titleWrapper}>
 						<Text style={styles.title}>{this.props.item.title}</Text>
-						<Text style={styles.timestamp}>{Moment(this.props.item.book_date, "D-M-YYYY").format("MMMM Do YYYY")}</Text>
+						<Text style={styles.timestamp}>{Moment(this.props.item.book_date + " " + this.props.item.book_fromtime.toFixed(2), "D-M-YYYY H.m").add(Moment().utcOffset(), "minutes").format("MMMM Do YYYY")}</Text>
 					</View>
 				</View>
 			</TouchableHighlight>

@@ -13,6 +13,11 @@ var Moment = require('moment');
 //get components
 var ToolbarAfterLoad = require('../components/toolbarAfterLoad');
 
+// var _date = Moment(this.props.item.book_date + this.props.item.book_fromtime, "D-M-YYYY H.m").add(Moment().utcOffset(), "minutes").format("MMMM Do YYYY");
+// var _inTime = Moment(this.props.item.book_date + this.props.item.book_fromtime, "D-M-YYYY H.m").add(Moment().utcOffset(), "minutes").format("H:mm");
+// var _outTime = Moment(this.props.item.book_date + this.props.item.book_totime, "D-M-YYYY H.m").add(Moment().utcOffset(), "minutes").format("H:mm");
+
+
 module.exports = React.createClass({
 	render: function(){
 		return(
@@ -30,7 +35,7 @@ module.exports = React.createClass({
 	    					<Text style={styles.title}>{this.props.data.title}</Text>
 	    					<Text style={styles.description}>{this.props.data.description}</Text>
     					</View>
-    					<View>
+    					<View style={{marginTop: 20}}>
     						<View style={styles.detailWrapper}>
     							<View style={styles.heading}>
     								<Text style={styles.bold}>Room Name</Text>
@@ -44,7 +49,7 @@ module.exports = React.createClass({
     								<Text style={styles.bold}>Booking Date</Text>
     							</View>
     							<View style={styles.info}>
-    								<Text>{Moment(this.props.data.book_date, "D-M-YYYY").format("MMMM Do YYYY")}</Text>
+    								<Text>{Moment(this.props.data.book_date + " " + this.props.data.book_fromtime.toFixed(2), "D-M-YYYY H.m").add(Moment().utcOffset(), "minutes").format("MMMM Do YYYY")}</Text>
     							</View>
     						</View>
     						<View style={styles.detailWrapper}>
@@ -52,7 +57,7 @@ module.exports = React.createClass({
     								<Text style={styles.bold}>In Time</Text>
     							</View>
     							<View style={styles.info}>
-    								<Text>{Moment(this.props.data.book_fromtime, "H.m").add(Moment().utcOffset(), "minutes").format("H:mm")}</Text>
+    								<Text>{Moment(this.props.data.book_date + " " + this.props.data.book_fromtime.toFixed(2), "D-M-YYYY H.m").add(Moment().utcOffset(), "minutes").format("H:mm")}</Text>
     							</View>
     						</View>
     						<View style={styles.detailWrapper}>
@@ -60,7 +65,7 @@ module.exports = React.createClass({
     								<Text style={styles.bold}>Out Time</Text>
     							</View>
     							<View style={styles.info}>
-    								<Text>{Moment(this.props.data.book_totime, "H.m").add(Moment().utcOffset(), "minutes").format("H:mm")}</Text>
+    								<Text>{Moment(this.props.data.book_date + " " + this.props.data.book_totime.toFixed(2), "D-M-YYYY H.m").add(Moment().utcOffset(), "minutes").format("H:mm")}</Text>
     							</View>
     						</View>
     						<View style={styles.detailWrapper}>

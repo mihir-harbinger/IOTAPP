@@ -76,7 +76,7 @@ module.exports = React.createClass({
 
 		var _bookFromTime = parseFloat(Moment(this.state.selectedInTime, "H:m").subtract(Moment().utcOffset(), "minutes").format("H.m"));
 		var _bookToTime = parseFloat(Moment(this.state.selectedOutTime, "H:m").subtract(Moment().utcOffset(), "minutes").format("H.m"));
-		var _bookDate = Moment(this.state.selectedDate).format("D-M-YYYY");
+		var _bookDate = Moment(Moment(this.state.selectedDate).format("D-M-YYYY") + " " + Moment(this.state.selectedInTime, "H:m").format("H.m"), "D-M-YYYY H:m").subtract(Moment().utcOffset(), "minutes").format("D-M-YYYY");
 
 		this.setState({ rawData: [], isReloadRequired: false, loaded: false, isEnabled: false });
 
@@ -170,7 +170,7 @@ module.exports = React.createClass({
     									</View>
 		        						<View style={styles.inOutTimeWrapper}>
 		        							<TouchableHighlight 
-		        								onPress={this.onPressChangeInOutTime.bind(this, "IN", {hour: this._parseHour(this.state.selectedInTime), minute: this._parseMinute(this.state.selectedInTime)})}
+		        								onPress={this.onPressChangeInOutTime.bind(this, "IN", {hour: this._parseHour(this.state.selectedInTime), minute: this._parseMinute(this.state.selectedInTime), is24Hour: true})}
 		        								underlayColor={'#3f9cc5'}
 		        							>
 		        								<Text style={styles.monthYearText}>
@@ -179,7 +179,7 @@ module.exports = React.createClass({
 		        							</TouchableHighlight>
 		        							<Text style={styles.monthYearText}> - </Text>
 		        							<TouchableHighlight 
-		        								onPress={this.onPressChangeInOutTime.bind(this, "OUT", {hour: this._parseHour(this.state.selectedOutTime), minute: this._parseMinute(this.state.selectedOutTime)})}
+		        								onPress={this.onPressChangeInOutTime.bind(this, "OUT", {hour: this._parseHour(this.state.selectedOutTime), minute: this._parseMinute(this.state.selectedOutTime), is24Hour: true})}
 		        								underlayColor={'#3f9cc5'}
 		        							>
 		        								<Text style={styles.monthYearText}>
@@ -311,13 +311,13 @@ module.exports = React.createClass({
 				}
 				else{
 					this.loadData();
-				}				
+				}
 				break;
 
 			case "OUT":
 				if(isTimeAdjusted){
 					ToastAndroid.show('Your out-time was adjusted to '+Moment(hour + ":" + minute, "H:m").format("H:mm"), ToastAndroid.LONG);
-				}				
+				}
 				this.setState({ selectedOutTime: Moment(hour + ":" + minute, "H:m") });
 				if((Date.parse('01/01/2011 ' + Moment(this.state.selectedInTime).format("H:m:s")) >= Date.parse('01/01/2011 ' + Moment(hour + ":" + minute, "H:m").format("H:m:s"))) && hour + ":" + minute !== "0:0"){
 					ToastAndroid.show('Your in-time should be less than out-time', ToastAndroid.LONG);

@@ -15,7 +15,7 @@ module.exports = React.createClass({
 		return(
 			<View style={styles.container}>
 	  			<View style={styles.loadingScene}>
-					<Image source={require('../../assets/images/loader.gif')} style={styles.loader}></Image>
+					<Image source={require('../../assets/images/loader2.gif')} style={styles.loader}></Image>
 				</View>
 			</View>
 		);
@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
 		justifyContent: 'center'
 	},
 	loader: {
-		width: 200,
-		height: 150
+		width: 98,
+		height: 98
 	}
 });

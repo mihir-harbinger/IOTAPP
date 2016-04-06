@@ -85,7 +85,7 @@ module.exports = React.createClass({
     		<View style={styles.container}>
           		<ToolbarAfterLoad
           			navIcon={require('../../assets/images/arrow_back.png')}
-	        		title={'Reservation List'}
+	        		title={'My Reservations'}
     	    		navigator={this.props.navigator}
         			sidebarRef={this}
         			isChildView={true}

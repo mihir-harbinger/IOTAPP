@@ -36,10 +36,11 @@ const styles = StyleSheet.create({
 		borderBottomColor: '#e8e8e8'
 	},
 	title: {
-		fontSize: 22,
-		color: '#777777'
+		fontSize: 18,
+		color: '#2e2e2e',
+		marginBottom: 3
 	},
 	location: {
 		color: '#adadad'
 	}
-})
+});
