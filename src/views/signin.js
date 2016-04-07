@@ -2,6 +2,7 @@
 var React = require('react-native');
 
 var {
+	AsyncStorage,
 	StyleSheet,
 	TextInput,
 	Image,
@@ -87,20 +88,30 @@ module.exports = React.createClass({
 				currentPhrase: 'Password is missing.',
 				phraseColor: '#1A237E'
 			});
-		}		
-		this.setState({ currentPhrase: 'Loading...', phraseColor: '#ffffff', interactionDisabled: true });
+		}
+		if(this.isMounted()){
+			this.setState({ currentPhrase: 'Loading...', phraseColor: '#ffffff', interactionDisabled: true });
+		}
 		this.setRandomMessage();
 
 		Parse.User.logIn(this.state.username, this.state.password, {
-			success: (user) => { 
+			success: async function(user){ 
 
 				clearInterval(interval);
-				_this.setState({
-					currentPhrase: '',
-					interactionDisabled: false
-				});
+				if(_this.isMounted()){
+					_this.setState({
+						currentPhrase: '',
+						interactionDisabled: false
+					});
+				}
 				console.log(user);
-				_this.props.navigator.immediatelyResetRouteStack([{name: 'home'}]);
+				try{
+					await AsyncStorage.setItem('IS_LOGGED_IN', 'SECRET_KEY');
+					_this.props.navigator.immediatelyResetRouteStack([{name: 'home'}]);
+				}
+				catch(e){
+					console.warn('[SIGN IN]', e);
+				}
 			},
 			error: (data, error) => {
 				console.log(data, error);
@@ -115,21 +126,25 @@ module.exports = React.createClass({
 								break;
 				}
 				clearInterval(interval);
-				_this.setState({
-					currentPhrase: errorText,
-					phraseColor: '#1A237E',
-					interactionDisabled: false
-				});
+				if(_this.isMounted()){
+					_this.setState({
+						currentPhrase: errorText,
+						phraseColor: '#1A237E',
+						interactionDisabled: false
+					});
+				}
 			}
 		});
 		setTimeout(function(){
 			if(_this.state.interactionDisabled === true){
 				clearInterval(interval);
-				_this.setState({
-					currentPhrase: 'Something went wrong. Please try again.',
-					phraseColor: '#1A237E',
-					interactionDisabled: false
-				})
+				if(_this.isMounted()){
+					_this.setState({
+						currentPhrase: 'Something went wrong. Please try again.',
+						phraseColor: '#1A237E',
+						interactionDisabled: false
+					})
+				}
 			}
 		}, 10000);
 	},

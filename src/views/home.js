@@ -307,13 +307,12 @@ module.exports = React.createClass({
 				previousTime = this.state.selectedInTime;
 				this.setState({ selectedInTime: Moment(hour + ":" + minute, "H:m") });
 
-				if(Date.parse('01/01/2011 ' + Moment(this.selectedInTime).format("H:m:s")) <= Date.parse('01/01/2011 ' + Moment().format("H:m:s"))){
+				if(Date.parse('01/01/2011 ' + Moment(this.state.selectedInTime).format("H:m:s")) <= Date.parse('01/01/2011 ' + Moment().format("H:m:s"))){
 					this.setState({selectedInTime: previousTime});
 					ToastAndroid.show('Invalid in-time', ToastAndroid.LONG);
 					break;
 				}
 				if((Date.parse('01/01/2011 ' + Moment(hour + ":" + minute, "H:m").format("H:m:s")) >= Date.parse('01/01/2011 ' + Moment(this.state.selectedOutTime).format("H:m:s"))) && Moment(this.state.selectedOutTime).format("H:m") !== "0:0"){
-					this.setState({selectedInTime: previousTime});
 					ToastAndroid.show('Your in-time should be less than out-time', ToastAndroid.LONG);
 					break;
 				}
@@ -321,7 +320,6 @@ module.exports = React.createClass({
 					ToastAndroid.show('Your in-time was adjusted to '+Moment(hour + ":" + minute, "H:m").format("H:mm"), ToastAndroid.LONG);
 				}
 				this.loadData();
-
 				break;
 
 			case "OUT":

@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
 		color: '#0288D1',
 	},
 	gray: {
-		color: '#939393',
+		color: '#5f5f5f',
 	},
 	errorMessage: {
 		color: '#1A237E',

@@ -2,6 +2,7 @@ var React = require('react-native');
 
 var {
 	ToolbarAndroid,
+	AsyncStorage,
 	StyleSheet,
 } = React;
 
@@ -20,13 +21,20 @@ module.exports = React.createClass({
           	</ToolbarAndroid>			
 		)		
 	},
-	_onActionSelected: function(position){
+	_onActionSelected: async function(position){
+		var storage;
 		switch(position){
 			case 0: if(this.props.title!=="About"){
 						this.props.navigator.push({name: 'about'});
 					}
 					break;
-			case 2: this.props.navigator.immediatelyResetRouteStack([{name: 'signin'}]);			
+			case 2: try{
+						await AsyncStorage.removeItem('IS_LOGGED_IN');
+						this.props.navigator.immediatelyResetRouteStack([{name: 'signin'}]);
+					}
+					catch(e){
+						console.warn('LOG OUT', e);
+					}
 					break;
 		}
 	},
